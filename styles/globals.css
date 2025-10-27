@@ -1,28 +1,28 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #658c5f;
-  --foreground: #d9cebe;
-  --card: #5a7a54;
-  --card-foreground: #d9cebe;
-  --popover: #5a7a54;
-  --popover-foreground: #d9cebe;
-  --primary: #658c5f;
-  --primary-foreground: #d9cebe;
-  --secondary: #d9cebe;
-  --secondary-foreground: #658c5f;
-  --muted: #5a7a54;
-  --muted-foreground: #c4b8a8;
-  --accent: #d9cebe;
-  --accent-foreground: #658c5f;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: #7a9a74;
-  --input: #7a9a74;
-  --ring: #d9cebe;
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -75,31 +75,8 @@
 }
 
 @theme inline {
-  --font-display: "Dela Gothic One", system-ui, sans-serif;
-  --font-sans: system-ui, -apple-system, sans-serif;
-
-  --color-primary: #658c5f;
-  --color-primary-foreground: #d9cebe;
-
-  --color-secondary: #d9cebe;
-  --color-secondary-foreground: #658c5f;
-
-  --color-accent: #d9cebe;
-  --color-accent-foreground: #658c5f;
-
-  --color-background: #658c5f;
-  --color-foreground: #d9cebe;
-
-  --color-card: #5a7a54;
-  --color-card-foreground: #d9cebe;
-
-  --color-muted: #5a7a54;
-  --color-muted-foreground: #c4b8a8;
-
-  --color-border: #7a9a74;
-
-  --radius: 1rem;
-  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -144,40 +121,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    background-image: radial-gradient(circle at 20% 30%, rgba(217, 206, 190, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(217, 206, 190, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(217, 206, 190, 0.02) 0%, transparent 50%);
-    background-attachment: fixed;
   }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-display;
-  }
-}
-
-@layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@font-face {
-  font-family: "Dela Gothic One";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("https://fonts.gstatic.com/s/delagothicone/v14/hESp6XxvMDRA-2eD0lXpDa6QkBAGRUsJQAlbUA.woff2") format("woff2");
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
