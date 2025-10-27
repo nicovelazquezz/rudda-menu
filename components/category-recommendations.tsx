@@ -75,7 +75,7 @@ export function CategoryRecommendations({ recommendations, categoryName }: Categ
           <div key={idx} className="flex-shrink-0 w-32">
             <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
               <Image src={rec.image || "/placeholder.svg"} alt={rec.name} fill className="object-cover" />
-              <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 py-0.5 rounded-full">
+              <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 py-2 rounded-full flex items-center justify-center">
                 <span className="text-[10px] font-semibold text-primary">{rec.tag}</span>
               </div>
             </div>
