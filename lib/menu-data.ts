@@ -114,7 +114,6 @@ const menuItems: MenuItem[] = [
       "Huevos en su punto justo o revueltos. Panceta ahumada crocante, champiñones salteados. Acompañados con pan de masa madre.",
     price: "10200",
     category: "huevos-king",
-    image: "/avocado-toast-eggs.png",
   },
   {
     id: "hk-3",
@@ -132,7 +131,6 @@ const menuItems: MenuItem[] = [
       "Huevos en su punto justo o revueltos. Ricota cremosa, morrones asados y toque de romero. Acompañados con pan de masa madre.",
     price: "9800",
     category: "huevos-king",
-    image: "/breakfast-toast-coffee.jpg",
   },
   {
     id: "hk-5",
@@ -150,7 +148,6 @@ const menuItems: MenuItem[] = [
       "Huevos en su punto justo o revueltos. Vegetales verdes (espinaca, brócoli, zucchini), tofu dorado, soja texturizada y quinoa. Acompañados con pan de masa madre.",
     price: "10800",
     category: "huevos-king",
-    image: "/fresh-salad-bowl.jpg",
   },
 
   // POWER BOWLS
@@ -168,7 +165,6 @@ const menuItems: MenuItem[] = [
     description: "Yogur griego, miel, frutas de estación y semillas. Podés sumar un scoop de proteína en polvo.",
     price: "7800",
     category: "power-bowls",
-    image: "/greek-yogurt-berries.png",
   },
   {
     id: "pb-3",
@@ -184,7 +180,6 @@ const menuItems: MenuItem[] = [
     description: "Avena y banana, con yogur de cacao y almendras. Podés sumar un scoop de proteína en polvo.",
     price: "7500",
     category: "power-bowls",
-    image: "/yogurt-bowl-berries.jpg",
   },
   {
     id: "pb-5",
@@ -201,7 +196,6 @@ const menuItems: MenuItem[] = [
     description: "Yogur natural, frutas de estación y granola casera. Podés sumar un scoop de proteína en polvo.",
     price: "7200",
     category: "power-bowls",
-    image: "/yogurt-bowl-berries.jpg",
   },
   {
     id: "pb-7",
@@ -218,7 +212,6 @@ const menuItems: MenuItem[] = [
       "Suave mezcla de crema de maní, yogur griego natural, avena, leche vegetal y cacao amargo. Con banana. Podés sumar un scoop de proteína en polvo.",
     price: "8200",
     category: "power-bowls",
-    image: "/yogurt-bowl-berries.jpg",
   },
   {
     id: "pb-9",
@@ -235,7 +228,6 @@ const menuItems: MenuItem[] = [
       "Yogur natural, matcha, arándanos, kiwi, frutillas y frutos secos. Podés sumar un scoop de proteína en polvo.",
     price: "8800",
     category: "power-bowls",
-    image: "/yogurt-bowl-berries.jpg",
   },
 
   // PANCAKES & WAFFLES
@@ -255,7 +247,6 @@ const menuItems: MenuItem[] = [
       "3 unidades. Pancakes de harina de almendras, avena o tradicional / Waffles tradicionales. Con banana caramelizada, cream cheese de cacao y miel. Podés sumar un scoop de proteína en polvo.",
     price: "9200",
     category: "pancakes-waffles",
-    image: "/pancakes-stack.jpg",
   },
   {
     id: "pw-3",
@@ -273,7 +264,6 @@ const menuItems: MenuItem[] = [
       "3 unidades. Suave mezcla de avena, banana y proteína en polvo. Con topping de frutos secos y mantequilla de maní.",
     price: "9500",
     category: "pancakes-waffles",
-    image: "/pancakes-stack.jpg",
   },
 
   // ENSALADAS
@@ -293,7 +283,6 @@ const menuItems: MenuItem[] = [
       "Mix de verdes, huevo mollet, brócoli, cabutia, palta, cebolla morada encurtida y vinagreta de limón. Podés sumar proteínas: cous cous, lentejas, soja texturizada, pollo o tofu.",
     price: "10200",
     category: "ensaladas",
-    image: "/fresh-salad-bowl.jpg",
   },
   {
     id: "en-3",
@@ -320,7 +309,6 @@ const menuItems: MenuItem[] = [
     description: "Tarta artesanal clásica o integral.",
     price: "6200",
     category: "tartas",
-    image: "/savory-tart.jpg",
   },
   {
     id: "ta-3",
@@ -336,7 +324,6 @@ const menuItems: MenuItem[] = [
     description: "Tarta artesanal clásica o integral.",
     price: "7200",
     category: "tartas",
-    image: "/savory-tart.jpg",
   },
   {
     id: "ta-5",
@@ -352,7 +339,6 @@ const menuItems: MenuItem[] = [
     description: "Tarta artesanal clásica o integral.",
     price: "6500",
     category: "tartas",
-    image: "/savory-tart.jpg",
   },
   {
     id: "ta-7",
@@ -380,7 +366,6 @@ const menuItems: MenuItem[] = [
       "Tortilla de trigo, pollo salteado con salsa de maní, repollo morado, zanahoria, brotes y cilantro. Acompañado con papas gajo al horno o ensalada.",
     price: "10800",
     category: "wraps",
-    image: "/wrap-sandwich.jpg",
   },
   {
     id: "wr-3",
@@ -400,7 +385,6 @@ const menuItems: MenuItem[] = [
       "Dos tostadas de pan de masa madre con dos dips a elección: mermelada, dulce de leche, queso crema, manteca o mantequilla de maní. Incluye infusión clásica y jugo de naranja.",
     price: "6500",
     category: "rituales",
-    image: "/breakfast-toast-coffee.jpg",
   },
   {
     id: "rr-2",
@@ -417,7 +401,6 @@ const menuItems: MenuItem[] = [
       "Tostada de masa madre con palta, tomates cherry, huevo mollet y semillas. Incluye infusión clásica y jugo de naranja.",
     price: "9200",
     category: "rituales",
-    image: "/avocado-toast-eggs.png",
   },
   {
     id: "rr-4",
@@ -433,7 +416,6 @@ const menuItems: MenuItem[] = [
     description: "Dos huevos, panceta, cherry, hongos, pan de masa madre. Incluye infusión clásica y jugo de naranja.",
     price: "11500",
     category: "rituales",
-    image: "/breakfast-toast-coffee.jpg",
   },
   {
     id: "rr-6",
@@ -450,7 +432,6 @@ const menuItems: MenuItem[] = [
     description: "Medialuna o croissant. Incluye infusión clásica y jugo de naranja.",
     price: "5500",
     category: "rituales",
-    image: "/golden-croissant.png",
   },
 
   // SMOOTHIES
@@ -469,7 +450,6 @@ const menuItems: MenuItem[] = [
       "Kiwi, manzana, jengibre, pepino, menta, apio y espinaca. Podés sumar un scoop extra de proteína en polvo.",
     price: "6800",
     category: "smoothies",
-    image: "/fruit-smoothie.png",
   },
   {
     id: "sm-3",
@@ -485,7 +465,6 @@ const menuItems: MenuItem[] = [
     description: "Banana, scoop de proteína, avena y leche vegetal. Podés sumar un scoop extra de proteína en polvo.",
     price: "7200",
     category: "smoothies",
-    image: "/fruit-smoothie.png",
   },
   {
     id: "sm-5",
@@ -501,7 +480,6 @@ const menuItems: MenuItem[] = [
     description: "Mango, ananá y leche de coco. Podés sumar un scoop extra de proteína en polvo.",
     price: "7200",
     category: "smoothies",
-    image: "/fruit-smoothie.png",
   },
 
   // SANDWICHES
@@ -519,7 +497,6 @@ const menuItems: MenuItem[] = [
     description: "Pan brioche, vegetales asados, espinaca y hummus. Acompañado con papas gajo al horno o ensalada.",
     price: "9200",
     category: "sandwiches",
-    image: "/gourmet-sandwich.png",
   },
   {
     id: "sw-3",
@@ -537,7 +514,6 @@ const menuItems: MenuItem[] = [
       "Pan brioche, mayonesa ahumada, carne braseada y tomates asados. Acompañado con papas gajo al horno o ensalada.",
     price: "12200",
     category: "sandwiches",
-    image: "/gourmet-sandwich.png",
   },
   {
     id: "sw-5",
@@ -556,7 +532,6 @@ const menuItems: MenuItem[] = [
     description: "Pan de masa madre con palta cremosa y toppings frescos.",
     price: "7500",
     category: "tostones",
-    image: "/avocado-toast.png",
   },
   {
     id: "to-2",
@@ -572,7 +547,6 @@ const menuItems: MenuItem[] = [
     description: "Pan de masa madre con tomates cherry asados y hierbas.",
     price: "7200",
     category: "tostones",
-    image: "/avocado-toast.png",
   },
   {
     id: "to-4",
@@ -598,7 +572,6 @@ const menuItems: MenuItem[] = [
     description: "Medialuna rellena con jamón natural y queso.",
     price: "3800",
     category: "dulces",
-    image: "/golden-croissant.png",
   },
   {
     id: "ds-3",
@@ -616,7 +589,6 @@ const menuItems: MenuItem[] = [
     description: "Shot único de café espresso.",
     price: "2200",
     category: "coffee",
-    image: "/cappuccino-coffee.png",
   },
   {
     id: "cf-2",
@@ -632,7 +604,6 @@ const menuItems: MenuItem[] = [
     description: "Espresso con agua caliente.",
     price: "2500",
     category: "coffee",
-    image: "/cappuccino-coffee.png",
   },
   {
     id: "cf-4",
@@ -648,7 +619,6 @@ const menuItems: MenuItem[] = [
     description: "Espresso con leche vaporizada y espuma.",
     price: "3500",
     category: "coffee",
-    image: "/cappuccino-coffee.png",
   },
   {
     id: "cf-6",
@@ -664,7 +634,6 @@ const menuItems: MenuItem[] = [
     description: "Espresso con un toque de leche.",
     price: "2800",
     category: "coffee",
-    image: "/cappuccino-coffee.png",
   },
   {
     id: "cf-8",
@@ -680,7 +649,6 @@ const menuItems: MenuItem[] = [
     description: "Espresso con leche vaporizada.",
     price: "3800",
     category: "coffee",
-    image: "/specialty-coffee-latte-art.jpg",
   },
   {
     id: "cf-10",
@@ -696,7 +664,6 @@ const menuItems: MenuItem[] = [
     description: "Espresso con leche fría y hielo.",
     price: "4200",
     category: "coffee",
-    image: "/specialty-coffee-latte-art.jpg",
   },
   {
     id: "cf-12",
@@ -712,7 +679,6 @@ const menuItems: MenuItem[] = [
     description: "Espresso con agua tónica y hielo.",
     price: "4500",
     category: "coffee",
-    image: "/specialty-coffee-latte-art.jpg",
   },
   {
     id: "cf-14",
@@ -728,7 +694,6 @@ const menuItems: MenuItem[] = [
     description: "Latte con chocolate.",
     price: "4500",
     category: "coffee",
-    image: "/specialty-coffee-latte-art.jpg",
   },
   {
     id: "cf-16",
@@ -744,7 +709,6 @@ const menuItems: MenuItem[] = [
     description: "Matcha con leche fría y hielo.",
     price: "4800",
     category: "coffee",
-    image: "/specialty-coffee-latte-art.jpg",
   },
   {
     id: "cf-18",
@@ -760,7 +724,6 @@ const menuItems: MenuItem[] = [
     description: "2 shots de café con leche de coco y MCT Oil.",
     price: "5500",
     category: "coffee",
-    image: "/specialty-coffee-latte-art.jpg",
   },
   {
     id: "cf-20",
@@ -778,7 +741,6 @@ const menuItems: MenuItem[] = [
     description: "Té negro de India, rosa mosqueta, arándano, hibiscus, frutilla.",
     price: "3500",
     category: "tea",
-    image: "/loose-leaf-tea.jpg",
   },
   {
     id: "te-2",
@@ -795,7 +757,6 @@ const menuItems: MenuItem[] = [
       "Té negro de India, canela, cardamomo, naranja, jengibre, anís estrellado, clavo de olor, pimienta rosa.",
     price: "3800",
     category: "tea",
-    image: "/loose-leaf-tea.jpg",
   },
   {
     id: "te-4",
@@ -811,7 +772,6 @@ const menuItems: MenuItem[] = [
     description: "Combinación de tés negros de Sri Lanka e India, azahar, pétalos de rosa, bergamota.",
     price: "3500",
     category: "tea",
-    image: "/loose-leaf-tea.jpg",
   },
 ]
 

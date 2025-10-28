@@ -29,17 +29,20 @@ function MenuItemRow({
     <div className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] focus-within:ring-2 focus-within:ring-white/60">
       <div className="flex gap-4 p-3 sm:p-4">
         {/* imagen */}
-        {image ? (
-          <Image
-            src={image}
-            alt={name}
-            width={72}
-            height={72}
-            className="h-16 w-16 sm:h-18 sm:w-18 shrink-0 rounded-xl object-cover ring-1 ring-black/10"
-          />
-        ) : (
-          <div className="h-16 w-16 shrink-0 rounded-xl bg-black/10" />
-        )}
+       {/* imagen */}
+{image ? (
+  <Image
+    src={image}
+    alt={name}
+    width={72}
+    height={72}
+    className="h-16 w-16 sm:h-18 sm:w-18 shrink-0 rounded-xl object-cover ring-1 ring-black/10"
+  />
+) : (
+  // mismo tamaño, sin fondo ni borde (invisible pero ocupa espacio)
+  <div aria-hidden className="h-16 w-16 sm:h-18 sm:w-18 shrink-0 rounded-xl" />
+)}
+
 
         {/* contenido */}
         <div className="min-w-0 flex-1">
