@@ -135,7 +135,7 @@ export default function HomePage() {
             <div key={item.id} className="flex-shrink-0 w-36">
               <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
                 <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
-                <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2  rounded-full py-2 rounded-full flex items-center justify-center">
+                <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2  rounded-full py-1 rounded-full flex items-center justify-center">
                   <span className="text-[10px] font-semibold text-primary">{item.tag}</span>
                 </div>
               </div>

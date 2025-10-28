@@ -1,19 +1,86 @@
-// app/category/[id]/page.tsx  (SERVER COMPONENT)
-import { notFound } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { ChevronLeft } from "lucide-react"
-import { menuCategories, getMenuItemsByCategory } from "@/lib/menu-data"
-import { CategoryRecommendations } from "@/components/category-recommendations"
-
+// app/category/[id]/page.tsx
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { ChevronLeft } from "lucide-react";
+import { menuCategories, getMenuItemsByCategory } from "@/lib/menu-data";
+import { CategoryRecommendations } from "@/components/category-recommendations";
 
 export function generateStaticParams() {
-  return menuCategories.map(c => ({ id: c.id }));
+  return menuCategories.map((c) => ({ id: c.id }));
 }
 export const dynamicParams = true;
 
+// Card/row para cada item del menú
+function MenuItemRow({
+  name,
+  description,
+  price,
+  image,
+  options,
+}: {
+  name: string;
+  description?: string;
+  price: string;
+  image?: string;
+  options?: string[];
+}) {
+  return (
+    <div className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] focus-within:ring-2 focus-within:ring-white/60">
+      <div className="flex gap-4 p-3 sm:p-4">
+        {/* imagen */}
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            width={72}
+            height={72}
+            className="h-16 w-16 sm:h-18 sm:w-18 shrink-0 rounded-xl object-cover ring-1 ring-black/10"
+          />
+        ) : (
+          <div className="h-16 w-16 shrink-0 rounded-xl bg-black/10" />
+        )}
 
-const categoryRecommendations: Record<string, Array<{ name: string; image: string; tag: string }>> = {
+        {/* contenido */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-2">
+            <h3 className="flex-1 truncate text-[15px] font-semibold text-white leading-tight">
+              {name}
+            </h3>
+            {/* precio en “pill” */}
+            <span className="ml-2 shrink-0 rounded-lg bg-accent/20 px-2.5 py-1 text-sm font-bold text-accent tracking-tight">
+              ${price}
+            </span>
+          </div>
+
+          {description ? (
+            <p className="mt-1 text-xs leading-relaxed text-white/80 line-clamp-3">
+              {description}
+            </p>
+          ) : null}
+
+          {options?.length ? (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {options.map((opt, i) => (
+                <li
+                  key={i}
+                  className="rounded-md bg-black/15 px-2 py-0.5 text-[11px] text-white/85"
+                >
+                  {opt}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const categoryRecommendations: Record<
+  string,
+  Array<{ name: string; image: string; tag: string }>
+> = {
   "huevos-king": [
     { name: "Green King", image: "/avocado-toast-eggs.png", tag: "Popular" },
     { name: "Salmón Ahumado", image: "/eggs-breakfast.jpg", tag: "Premium" },
@@ -66,17 +133,20 @@ const categoryRecommendations: Record<string, Array<{ name: string; image: strin
     { name: "Chai Especiado", image: "/loose-leaf-tea.jpg", tag: "Popular" },
     { name: "Earl Grey", image: "/loose-leaf-tea.jpg", tag: "Clásico" },
   ],
-}
-export default async function CategoryPage(
-  { params }: { params: Promise<{ id: string }> }   // ⬅️ importante: Promise
-) {
-  const { id } = await params                         // ⬅️ importante: await
+};
 
-  const category = menuCategories.find((c) => c.id === id)
-  if (!category) notFound()
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-  const items = getMenuItemsByCategory(id)
-  const recommendations = categoryRecommendations[id] || []
+  const category = menuCategories.find((c) => c.id === id);
+  if (!category) notFound();
+
+  const items = getMenuItemsByCategory(id);
+  const recommendations = categoryRecommendations[id] || [];
 
   return (
     <div className="min-h-screen bg-primary text-primary-foreground">
@@ -95,46 +165,38 @@ export default async function CategoryPage(
 
       {/* Hero */}
       <div className="relative h-48 w-full overflow-hidden">
-        <Image src={category.image || "/placeholder.svg"} alt={category.name} fill className="object-cover" />
+        <Image
+          src={category.image || "/placeholder.svg"}
+          alt={category.name}
+          fill
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent" />
       </div>
 
       {/* Recomendaciones */}
       {recommendations.length > 0 && (
-        <CategoryRecommendations recommendations={recommendations} categoryName={category.name} />
+        <CategoryRecommendations
+          recommendations={recommendations}
+          categoryName={category.name}
+        />
       )}
 
-      {/* Items */}
-      <div className="px-6 py-6 space-y-6">
+      {/* Items (usando MenuItemRow) */}
+      <div className="px-6 py-6 space-y-4">
         {items.map((item) => (
-          <div key={item.id} className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h2 className="text-base font-medium mb-1.5 text-balance leading-snug">{item.name}</h2>
-                {item.description && (
-                  <p className="text-xs text-primary-foreground/70 leading-relaxed mb-2">{item.description}</p>
-                )}
-                {item.options?.length ? (
-                  <ul className="space-y-0.5 mb-2">
-                    {item.options.map((option, idx) => (
-                      <li key={idx} className="text-xs text-primary-foreground/75 flex items-start gap-2">
-                        <span className="text-accent mt-0.5 text-[10px]">●</span>
-                        <span className="leading-relaxed">{option}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-              <div className="flex-shrink-0 text-right">
-                <p className="text-lg font-bold text-accent">${item.price}</p>
-              </div>
-            </div>
-            <div className="h-px bg-primary-foreground/10" />
-          </div>
+          <MenuItemRow
+            key={item.id}
+            name={item.name}
+            description={item.description}
+            price={item.price}
+            image={(item as any).image}
+            options={item.options}
+          />
         ))}
       </div>
 
       <div className="h-6" />
     </div>
-  )
+  );
 }
