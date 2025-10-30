@@ -32,29 +32,39 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
   const [imagen, setImagen] = useState(""); // <-- NUEVO
   const [imageError, setImageError] = useState(""); // <-- NUEVO
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoadingCategories(true);
-      try {
-        const response = await axios.get(`${API_URL}/categorias.php`);
-        console.log("Categorías recibidas:", response.data);
+useEffect(() => {
+  const fetchCategories = async () => {
+    setIsLoadingCategories(true);
+    try {
+      const response = await axios.get(`${API_URL}/categorias_y_destacados.php`);
+      console.log("Categorías recibidas:", response.data);
+      
+      // ✅ Acceder a response.data.categorias y mapear al formato esperado
+      if (response.data.success && Array.isArray(response.data.categorias)) {
+        const categoriasFormateadas = response.data.categorias.map((cat: any) => ({
+          categoria: {
+            id: cat.id,
+            nombre: cat.nombre,
+            alias: cat.alias,
+          },
+          subcategorias: cat.subcategorias,
+        }));
         
-        if (Array.isArray(response.data)) {
-          setCategories(response.data);
-        } else {
-          console.error("La respuesta no es un array:", response.data);
-          setCategories([]);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+        setCategories(categoriasFormateadas);
+      } else {
+        console.error("La respuesta no tiene el formato esperado:", response.data);
         setCategories([]);
-      } finally {
-        setIsLoadingCategories(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
 
-    fetchCategories();
-  }, []);
+  fetchCategories();
+}, []);
 
   useEffect(() => {
     if (categories.length > 0 && selectedCategory) {

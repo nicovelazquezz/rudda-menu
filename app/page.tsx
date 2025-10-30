@@ -4,16 +4,18 @@ import { useState, useRef, useEffect } from "react";
 import { Search, ChevronRight, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { CategoryCard } from "@/components/ui/CategoryCard";
-import { useMenuData, createSlug } from "@/hooks/useMenuData";
+import { useMenuData } from "@/hooks/useMenuData";
 import ModalPromos from "@/components/ModalPromos";
+import BackToTop from "@/components/BackToTop";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const { productos, categorias, loading, error } = useMenuData();
+  const { categorias, destacados, loading, error } = useMenuData();
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -30,7 +32,7 @@ export default function HomePage() {
       container.addEventListener("scroll", checkScroll);
       return () => container.removeEventListener("scroll", checkScroll);
     }
-  }, []);
+  }, [destacados]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
@@ -42,22 +44,74 @@ export default function HomePage() {
     }
   };
 
-  // Filtrar productos para recomendados (productos con precio especial o promocional)
-  const recomendados = productos
-    .filter((p) => p.precioespecial || p.promocional)
-    .slice(0, 5);
+  // Obtener todas las subcategorías o filtradas por categoría seleccionada
+  const subcategoriasToShow = selectedCategoryId
+    ? categorias.find((c) => c.id === selectedCategoryId)?.subcategorias || []
+    : categorias.flatMap((c) =>
+        c.subcategorias.map((sub) => ({
+          ...sub,
+          categoriaAlias: c.alias,
+          categoriaNombre: c.nombre,
+        }))
+      );
 
-  // Si no hay productos con promoción, mostrar los primeros 5
-  const recommendedItems = recomendados.length > 0 ? recomendados : productos.slice(0, 5);
-
-  // Filtrar productos por búsqueda
-  const filteredProductos = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filtrar subcategorías por búsqueda
+  const filteredSubcategorias = subcategoriasToShow.filter((sub) =>
+    sub.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Loading Screen - Pantalla de carga elegante
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative w-48 h-16 animate-pulse">
+            <Image
+              src="/logo-rudda.png"
+              alt="Rudda Coffee Club"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div className="flex gap-2">
+            <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error State - Pantalla de error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center px-6">
+        <div className="text-center">
+          <div className="relative w-48 h-16 mx-auto mb-6 opacity-50">
+            <Image
+              src="/logo-rudda.png"
+              alt="Rudda Coffee Club"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <p className="text-accent mb-4 text-lg">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-accent text-primary rounded-lg hover:bg-accent/90 transition-colors font-medium"
+          >
+            Intentar nuevamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-6">
-            <ModalPromos /> 
+      <ModalPromos />
 
       <header className="sticky top-0 z-50 bg-primary px-6 py-4 text-center">
         <Image
@@ -91,47 +145,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Resultados de búsqueda */}
-      {searchQuery && (
-        <div className="px-6 mb-5">
-          <h2 className="text-sm font-semibold text-accent mb-2.5">
-            Resultados de búsqueda ({filteredProductos.length})
-          </h2>
-          <div className="space-y-2">
-            {filteredProductos.map((producto) => (
-              <div
-                key={producto.id}
-                className="bg-white/15 backdrop-blur-md border border-white/20 rounded-xl p-3 flex gap-3"
-              >
-                {producto.imagen && (
-                  <div className="relative h-16 w-16 shrink-0 rounded-lg overflow-hidden">
-                    <Image
-                      src={producto.imagen}
-                      alt={producto.nombre}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-accent truncate">
-                    {producto.nombre}
-                  </h3>
-                  <p className="text-xs text-accent/80 line-clamp-2 mt-0.5">
-                    {producto.descripcion}
-                  </p>
-                  <p className="text-sm font-bold text-accent mt-1">
-                    ${producto.precio}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Recomendados */}
-      {!searchQuery && recommendedItems.length > 0 && (
+      {/* Recomendados - Solo si hay destacados */}
+      {!searchQuery && destacados.length > 0 && (
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2.5 px-6">
             <h2 className="text-sm font-semibold text-accent">
@@ -160,7 +175,7 @@ export default function HomePage() {
             ref={scrollContainerRef}
             className="flex gap-3 overflow-x-auto pb-2 px-6 scrollbar-hide scroll-smooth"
           >
-            {recommendedItems.map((item) => (
+            {destacados.map((item) => (
               <div key={item.id} className="flex-shrink-0 w-36">
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
                   {item.imagen ? (
@@ -173,10 +188,10 @@ export default function HomePage() {
                   ) : (
                     <div className="w-full h-full bg-accent/20" />
                   )}
-                  {item.promocional && (
+                  {item.label && (
                     <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 rounded-full py-1 flex items-center justify-center">
                       <span className="text-[10px] font-semibold text-primary">
-                        Promo
+                        {item.label}
                       </span>
                     </div>
                   )}
@@ -191,45 +206,81 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="px-6 py-12 text-center">
-          <p className="text-accent/70">Cargando menú...</p>
-        </div>
-      )}
+      {/* Categorías y Subcategorías */}
+      <div className="px-6">
+        {/* Header con Chips de Categorías */}
+        {!searchQuery && (
+          <div className="flex items-center gap-3 mb-3 overflow-x-auto scrollbar-hide pb-2">
 
-      {/* Error State */}
-      {error && (
-        <div className="px-6 py-12 text-center">
-          <p className="text-red-500">{error}</p>
-        </div>
-      )}
+            <div className="flex gap-2">
+              {/* Chip "Todas" */}
+              <button
+                onClick={() => setSelectedCategoryId(null)}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
+                  selectedCategoryId === null
+                    ? "bg-accent text-primary"
+                    : "bg-accent/20 text-accent border border-accent/30 hover:bg-accent/30"
+                }`}
+              >
+                TODO
+              </button>
 
-      {/* Categorías */}
-      {!loading && !error && !searchQuery && (
-        <div className="px-6">
-          <h2 className="text-sm font-semibold text-accent mb-2.5">Categorías</h2>
+              {/* Chips de Categorías */}
+              {categorias.map((categoria) => (
+                <button
+                  key={categoria.id}
+                  onClick={() => setSelectedCategoryId(categoria.id)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
+                    selectedCategoryId === categoria.id
+                      ? "bg-accent text-primary"
+                      : "bg-accent/20 text-accent border border-accent/30 hover:bg-accent/30"
+                  }`}
+                >
+                  {categoria.nombre}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Título para resultados de búsqueda */}
+        {searchQuery && (
+          <h2 className="text-sm font-semibold text-accent mb-2.5">
+            Resultados de búsqueda ({filteredSubcategorias.length})
+          </h2>
+        )}
+
+        {/* Subcategorías */}
+        {filteredSubcategorias.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-accent/70">
+              {searchQuery
+                ? `No se encontraron resultados para "${searchQuery}"`
+                : "No hay subcategorías disponibles"}
+            </p>
+          </div>
+        ) : (
           <div className="space-y-3">
-            {categorias.map((c) => {
-              const slug = createSlug(c.categoria.nombre);
-              const productosCount = productos.filter((p) =>
-                p.categorias.some((cat) => String(cat.id) === String(c.categoria.id))
-              ).length;
+            {filteredSubcategorias.map((sub: any) => {
+              const categoria = categorias.find((c) =>
+                c.subcategorias.some((s) => s.id === sub.id)
+              );
 
               return (
                 <CategoryCard
-                  key={c.categoria.id}
-                  href={`/category/${c.categoria.id}`}
-                  name={c.categoria.nombre}
-                  itemCount={productosCount}
-                  image="/placeholder.svg" // Puedes agregar imágenes default por categoría
+                  key={`${sub.id}-${categoria?.id || "all"}`}
+                  href={`/category/${categoria?.alias || sub.categoriaAlias}/${sub.id}`}
+                  name={sub.nombre}
+                  itemCount={sub.count}
+                  image={sub.foto}
                   variant="glass"
                 />
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+      <BackToTop />
     </div>
   );
 }

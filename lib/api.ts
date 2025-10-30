@@ -37,7 +37,7 @@ export interface Producto {
   sin_tacc: string;
   vegetariano: string;
   vegano: string;
-  imagen: string;
+  foto: string;
 }
 
 export interface CategoriaConSubcategorias {
@@ -49,6 +49,8 @@ export interface CategoriaConSubcategorias {
     id: number;
     nombre: string;
     descripcion?: string;
+    count?: number;
+    foto?: string;
   }[];
   horarios: any[]; // <-- AGREGAR ESTE CAMPO
 }

@@ -16,15 +16,18 @@ import {
   Plus,
   Edit,
   Trash2,
-  Percent
+  Percent,
 } from "lucide-react";
 import ModalProductAdd from "@/components/gestion/products/ModalAddProduct";
 import ModalProductEdit from "@/components/gestion/products/ModalEditProduct";
-import Promociones from "@/components/gestion/products/Promociones";
+import Promociones from "@/components/gestion/Promociones";
 import ModalAddSubcategoria from "@/components/gestion/categorias/ModalAddSubcategoria";
 import ModalEditSubcategoria from "@/components/gestion/categorias/ModalEditSubcategoria";
 import axios from "axios";
-import { Producto, CategoriaConSubcategorias } from "@/lib/api"
+import { Producto, CategoriaConSubcategorias } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "next/navigation";
+
 const menuItems = [
   { icon: Package, label: "Productos", value: "productos" },
   { icon: Tag, label: "Categorías", value: "categorias" },
@@ -39,11 +42,14 @@ const menuItems = [
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function GestionDashboard() {
+  const { user, logout } = useAuthStore();
+  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState("productos");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<CategoriaConSubcategorias | null>(null);
-  
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoriaConSubcategorias | null>(null);
 
   // Estados para API
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -55,9 +61,11 @@ export default function GestionDashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
 
-  const [isAddSubcategoriaModalOpen, setIsAddSubcategoriaModalOpen] = useState(false);
-const [isEditSubcategoriaModalOpen, setIsEditSubcategoriaModalOpen] = useState(false);
-const [selectedSubcategoria, setSelectedSubcategoria] = useState<any>(null);
+  const [isAddSubcategoriaModalOpen, setIsAddSubcategoriaModalOpen] =
+    useState(false);
+  const [isEditSubcategoriaModalOpen, setIsEditSubcategoriaModalOpen] =
+    useState(false);
+  const [selectedSubcategoria, setSelectedSubcategoria] = useState<any>(null);
 
   // Fetch productos
   const fetchProductos = async () => {
@@ -75,12 +83,28 @@ const [selectedSubcategoria, setSelectedSubcategoria] = useState<any>(null);
   };
 
   // Fetch categorías
+  // Fetch categorías
   const fetchCategorias = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_URL}/categorias.php`);
-      setCategorias(response.data);
+      const response = await axios.get(
+        `${API_URL}/categorias_y_destacados.php`
+      );
+
+      // Mapear la nueva estructura al formato esperado
+      const categoriasFormateadas = response.data.categorias.map(
+        (cat: any) => ({
+          categoria: {
+            id: cat.id,
+            nombre: cat.nombre,
+            alias: cat.alias,
+          },
+          subcategorias: cat.subcategorias,
+        })
+      );
+
+      setCategorias(categoriasFormateadas);
     } catch (err) {
       console.error("Error fetching categorías:", err);
       setError("Error al cargar las categorías");
@@ -99,10 +123,10 @@ const [selectedSubcategoria, setSelectedSubcategoria] = useState<any>(null);
     p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-const filteredSubcategorias =
-  selectedCategory?.subcategorias?.filter((s) =>
-    s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredSubcategorias =
+    selectedCategory?.subcategorias?.filter((s) =>
+      s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   const handleProductAdded = () => {
     fetchProductos(); // Recargar productos
@@ -121,22 +145,26 @@ const filteredSubcategorias =
   };
 
   const handleDeleteSubcategoria = async (subcategoria: any) => {
-  if (!confirm(`¿Estás seguro de eliminar la subcategoría "${subcategoria.nombre}"?`)) {
-    return;
-  }
+    if (
+      !confirm(
+        `¿Estás seguro de eliminar la subcategoría "${subcategoria.nombre}"?`
+      )
+    ) {
+      return;
+    }
 
-  try {
-    await axios.post(`${API_URL}/delete_subcategoria`, {
-      id: subcategoria.id,
-    });
-    
-    fetchCategorias(); // Recargar categorías
-    alert("Subcategoría eliminada correctamente");
-  } catch (error) {
-    console.error("Error deleting subcategoria:", error);
-    alert("Error al eliminar la subcategoría");
-  }
-};
+    try {
+      await axios.post(`${API_URL}/delete_subcategoria.php`, {
+        id: subcategoria.id,
+      });
+
+      fetchCategorias(); // Recargar categorías
+      alert("Subcategoría eliminada correctamente");
+    } catch (error) {
+      console.error("Error deleting subcategoria:", error);
+      alert("Error al eliminar la subcategoría");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#d9cebe]">
@@ -170,16 +198,19 @@ const filteredSubcategorias =
               <button
                 key={item.value}
                 onClick={() => setActiveTab(item.value)}
-                disabled={!["productos", "categorias", "promociones"].includes(
-                  item.value
-                )}
+                disabled={
+                  !["productos", "categorias", "promociones"].includes(
+                    item.value
+                  )
+                }
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   activeTab === item.value
                     ? "bg-[#658c5f] text-[#d9cebe] shadow-lg"
                     : "text-black hover:bg-[#658c5f] hover:text-[#d9cebe]"
                 } ${
-                  !["productos", "categorias", "promociones"].includes(item.value) &&
-                  "cursor-not-allowed opacity-50"
+                  !["productos", "categorias", "promociones"].includes(
+                    item.value
+                  ) && "cursor-not-allowed opacity-50"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -189,15 +220,32 @@ const filteredSubcategorias =
           </nav>
 
           {/* User Info */}
+          {/* User Info */}
           <div className="p-4 border-t border-[#c4b8a8]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#658c5f] rounded-full flex items-center justify-center">
-                <span className="text-[#d9cebe] font-bold">BN</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#658c5f] rounded-full flex items-center justify-center">
+                  <span className="text-[#d9cebe] font-bold">
+                    {user?.nombre.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-black">
+                    {user?.nombre}
+                  </p>
+                  <p className="text-xs text-black/70">Admin</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-black">Borean Nicolas</p>
-                <p className="text-xs text-black/70">Admin</p>
-              </div>
+              <button
+                onClick={() => {
+                  logout();
+                  router.push("/gestion/login");
+                }}
+                className="p-2 hover:bg-[#658c5f] hover:text-[#d9cebe] rounded transition-colors"
+                title="Cerrar sesión"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
@@ -260,202 +308,237 @@ const filteredSubcategorias =
             </div>
           )}
 
-{/* Productos Tab */}
-{activeTab === "productos" && !loading && (
-  <div className="space-y-4">
-    <button
-      onClick={() => setIsModalOpen(true)}
-      className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-    >
-      <Plus className="w-5 h-5" />
-      Añadir Producto
-    </button>
+          {/* Productos Tab */}
+          {activeTab === "productos" && !loading && (
+            <div className="space-y-4">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Añadir Producto
+              </button>
 
-    {filteredProductos.length === 0 ? (
-      <div className="text-center py-8">
-        <p className="text-black">No hay productos disponibles</p>
-      </div>
-    ) : (
-      <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#c4b8a8] border-b-2 border-[#b3a898]">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                  PRODUCTO
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                  DESCRIPCIÓN
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                  PRECIO
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                  CATEGORÍA
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                  SUBCATEGORÍAS
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                  ACCIONES
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#c4b8a8]">
-              {filteredProductos.map((producto) => (
-                <tr
-                  key={producto.id}
-                  className="hover:bg-[#c4b8a8] transition-colors"
-                >
-                  {/* Columna de Producto con imagen */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      {/* Miniatura de imagen */}
-                      <div className="relative h-12 w-12 shrink-0 rounded-lg overflow-hidden border-2 border-[#c4b8a8] bg-white/50">
-                        {producto.imagen ? (
-                          <Image
-                            src={producto.imagen}
-                            alt={producto.nombre}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-black/30">
-                            <Package className="w-6 h-6" />
-                          </div>
-                        )}
-                      </div>
-                      {/* Nombre del producto */}
-                      <span className="text-sm text-black font-medium">
-                        {producto.nombre}
-                      </span>
-                    </div>
-                  </td>
+              {filteredProductos.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-black">No hay productos disponibles</p>
+                </div>
+              ) : (
+                <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-[#c4b8a8] border-b-2 border-[#b3a898]">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            PRODUCTO
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            DESCRIPCIÓN
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            PRECIO
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            CATEGORÍA
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            SUBCATEGORÍAS
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            ACCIONES
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#c4b8a8]">
+                        {filteredProductos.map((producto) => (
+                          <tr
+                            key={producto.id}
+                            className="hover:bg-[#c4b8a8] transition-colors"
+                          >
+                            {/* Columna de Producto con imagen */}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                {/* Miniatura de imagen */}
+                                <div className="relative h-12 w-12 shrink-0 rounded-lg overflow-hidden border-2 border-[#c4b8a8] bg-white/50">
+                                  {producto.foto ? (
+                                    <Image
+                                      src={producto.foto}
+                                      alt={producto.nombre}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-black/30">
+                                      <Package className="w-6 h-6" />
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Nombre del producto */}
+                                <span className="text-sm text-black font-medium">
+                                  {producto.nombre}
+                                </span>
+                              </div>
+                            </td>
 
-                  <td className="px-6 py-4 text-sm text-black/80">
-                    {producto.descripcion.substring(0, 50)}...
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black font-medium">
-                    ${parseFloat(producto.precio).toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black/80">
-                    {producto.categorias.map(c => c.nombre).join(", ")}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black/80">
-                    {producto.subcategorias.map(s => s.nombre).join(", ")}
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleEditProduct(producto)}
-                      className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Editar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    )}
-  </div>
-)}
-
-{/* Subcategorías Tab */}
-{activeTab === "categorias" && !loading && (
-  <div className="space-y-6">
-    <h2 className="font-display text-xl text-black mb-4">
-      Categorías
-    </h2>
-
-    {categorias.length === 0 ? (
-      <div className="text-center py-8">
-        <p className="text-black">No hay categorías disponibles</p>
-      </div>
-    ) : (
-      <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {Array.isArray(categorias) && categorias.map((categoria) => (
-            <button
-              key={categoria.categoria.id}
-              onClick={() => setSelectedCategory(categoria)}
-              className={`p-6 rounded-lg text-left transition-all border-2 ${
-                selectedCategory?.categoria.id === categoria.categoria.id
-                  ? "bg-[#658c5f] text-[#d9cebe] border-[#658c5f] shadow-lg scale-105"
-                  : "bg-[#d9cebe] text-black border-[#658c5f] hover:bg-[#658c5f] hover:text-[#d9cebe] hover:border-[#658c5f] hover:shadow-md"
-              }`}
-            >
-              <h3 className="font-display text-xl">{categoria.categoria.nombre}</h3>
-              <p className="text-sm mt-2 opacity-80">
-                {categoria.subcategorias?.length || 0} subcategorías
-              </p>
-            </button>
-          ))}
-        </div>
-
-        {selectedCategory && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg text-black">
-                Subcategorías de {selectedCategory.categoria.nombre}
-              </h3>
-                <button 
-                  onClick={() => setIsAddSubcategoriaModalOpen(true)}
-                  className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Añadir Subcategoría
-                </button>
-            </div>
-
-            {filteredSubcategorias.length === 0 ? (
-              <div className="text-center py-8 bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8]">
-                <p className="text-black">No hay subcategorías en esta categoría</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSubcategorias.map((subcategoria) => (
-                  <div
-                    key={subcategoria.id}
-                    className="bg-[#d9cebe] p-6 rounded-lg border-2 border-[#c4b8a8] flex justify-between items-start group hover:border-[#658c5f] hover:shadow-md transition-all"
-                  >
-                    <div className="flex-1">
-                      <h4 className="font-medium text-black mb-1">
-                        {subcategoria.nombre}
-                      </h4>
-                      <p className="text-sm text-black/70">
-                        {subcategoria.descripcion || "Sin descripción"}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-  <button 
-    onClick={() => {
-      setSelectedSubcategoria(subcategoria);
-      setIsEditSubcategoriaModalOpen(true);
-    }}
-    className="p-2 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] rounded transition-colors"
-  >
-    <Edit className="w-4 h-4" />
-  </button>
-  <button 
-    onClick={() => handleDeleteSubcategoria(subcategoria)}
-    className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-  >
-    <Trash2 className="w-4 h-4" />
-  </button>
-</div>
+                            <td className="px-6 py-4 text-sm text-black/80">
+                              {producto.descripcion.substring(0, 50)}...
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black font-medium">
+                              ${parseFloat(producto.precio).toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black/80">
+                              {producto.categorias
+                                .map((c) => c.nombre)
+                                .join(", ")}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black/80">
+                              {producto.subcategorias
+                                .map((s) => s.nombre)
+                                .join(", ")}
+                            </td>
+                            <td className="px-6 py-4">
+                              <button
+                                onClick={() => handleEditProduct(producto)}
+                                className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Editar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </>
-    )}
-  </div>
-)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Subcategorías Tab */}
+          {activeTab === "categorias" && !loading && (
+            <div className="space-y-6">
+              <h2 className="font-display text-xl text-black mb-4">
+                Categorías
+              </h2>
+
+              {categorias.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-black">No hay categorías disponibles</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {Array.isArray(categorias) &&
+                      categorias.map((categoria) => (
+                        <button
+                          key={categoria.categoria.id}
+                          onClick={() => setSelectedCategory(categoria)}
+                          className={`p-6 rounded-lg text-left transition-all border-2 ${
+                            selectedCategory?.categoria.id ===
+                            categoria.categoria.id
+                              ? "bg-[#658c5f] text-[#d9cebe] border-[#658c5f] shadow-lg scale-105"
+                              : "bg-[#d9cebe] text-black border-[#658c5f] hover:bg-[#658c5f] hover:text-[#d9cebe] hover:border-[#658c5f] hover:shadow-md"
+                          }`}
+                        >
+                          <h3 className="font-display text-xl">
+                            {categoria.categoria.nombre}
+                          </h3>
+                          <p className="text-sm mt-2 opacity-80">
+                            {categoria.subcategorias?.length || 0} subcategorías
+                          </p>
+                        </button>
+                      ))}
+                  </div>
+
+                  {selectedCategory && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display text-lg text-black">
+                          Subcategorías de {selectedCategory.categoria.nombre}
+                        </h3>
+                        <button
+                          onClick={() => setIsAddSubcategoriaModalOpen(true)}
+                          className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Añadir Subcategoría
+                        </button>
+                      </div>
+
+                      {filteredSubcategorias.length === 0 ? (
+                        <div className="text-center py-8 bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8]">
+                          <p className="text-black">
+                            No hay subcategorías en esta categoría
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {filteredSubcategorias.map((subcategoria) => (
+                            <div
+                              key={subcategoria.id}
+                              className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden group hover:border-[#658c5f] hover:shadow-md transition-all"
+                            >
+                              {/* Imagen de subcategoría */}
+                              <div className="relative h-32 w-full bg-white/50">
+                                {subcategoria.foto ? (
+                                  <Image
+                                    src={subcategoria.foto}
+                                    alt={subcategoria.nombre}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-black/30">
+                                    <Tag className="w-12 h-12" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Contenido */}
+                              <div className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="font-medium text-black">
+                                    {subcategoria.nombre}
+                                  </h4>
+                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedSubcategoria(subcategoria);
+                                        setIsEditSubcategoriaModalOpen(true);
+                                      }}
+                                      className="p-2 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] rounded transition-colors"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteSubcategoria(subcategoria)
+                                      }
+                                      className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-black/70">
+                                  {subcategoria.descripcion ||
+                                    "Sin descripción"}
+                                </p>
+                                <p className="text-xs text-black/50 mt-2">
+                                  {subcategoria.count || 0} productos
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Promociones Tab */}
           {activeTab === "promociones" && <Promociones />}
@@ -486,40 +569,38 @@ const filteredSubcategorias =
         </div>
       )}
 
+      {/* Modal Añadir Subcategoría */}
+      {isAddSubcategoriaModalOpen && selectedCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <ModalAddSubcategoria
+            onClose={() => setIsAddSubcategoriaModalOpen(false)}
+            onSuccess={() => {
+              fetchCategorias();
+              setIsAddSubcategoriaModalOpen(false);
+            }}
+            categoriaId={selectedCategory.categoria.id}
+            categoriaNombre={selectedCategory.categoria.nombre}
+          />
+        </div>
+      )}
 
-{/* Modal Añadir Subcategoría */}
-{isAddSubcategoriaModalOpen && selectedCategory && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <ModalAddSubcategoria
-      onClose={() => setIsAddSubcategoriaModalOpen(false)}
-      onSuccess={() => {
-        fetchCategorias();
-        setIsAddSubcategoriaModalOpen(false);
-      }}
-      categoriaId={selectedCategory.categoria.id}
-      categoriaNombre={selectedCategory.categoria.nombre}
-    />
-  </div>
-)}
-
-{/* Modal Editar Subcategoría */}
-{isEditSubcategoriaModalOpen && selectedSubcategoria && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <ModalEditSubcategoria
-      onClose={() => {
-        setIsEditSubcategoriaModalOpen(false);
-        setSelectedSubcategoria(null);
-      }}
-      onSuccess={() => {
-        fetchCategorias();
-        setIsEditSubcategoriaModalOpen(false);
-        setSelectedSubcategoria(null);
-      }}
-      subcategoria={selectedSubcategoria}
-    />
-  </div>
-)}
-
+      {/* Modal Editar Subcategoría */}
+      {isEditSubcategoriaModalOpen && selectedSubcategoria && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <ModalEditSubcategoria
+            onClose={() => {
+              setIsEditSubcategoriaModalOpen(false);
+              setSelectedSubcategoria(null);
+            }}
+            onSuccess={() => {
+              fetchCategorias();
+              setIsEditSubcategoriaModalOpen(false);
+              setSelectedSubcategoria(null);
+            }}
+            subcategoria={selectedSubcategoria}
+          />
+        </div>
+      )}
     </div>
   );
 }

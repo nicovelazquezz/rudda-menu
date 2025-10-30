@@ -13,18 +13,24 @@ interface ModalProductEditProps {
   onSuccess?: () => void;
 }
 
-const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps) => {
+const ModalProductEdit = ({
+  onClose,
+  product,
+  onSuccess,
+}: ModalProductEditProps) => {
   const [name, setName] = useState(product?.nombre || "");
   const [description, setDescription] = useState(product?.descripcion || "");
   const [price, setPrice] = useState(product?.precio || "");
-  const [precioEspecial, setPrecioEspecial] = useState(product?.precioespecial || "");
+  const [precioEspecial, setPrecioEspecial] = useState(
+    product?.precioespecial || ""
+  );
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
-  const [categorySubcategoryPairs, setCategorySubcategoryPairs] = useState<any[]>(
-    product?.vinculaciones || []
-  );
+  const [categorySubcategoryPairs, setCategorySubcategoryPairs] = useState<
+    any[]
+  >(product?.vinculaciones || []);
   const [promocional, setPromocional] = useState(product?.promocional || "");
   const [isGlutenFree, setIsGlutenFree] = useState(product?.sin_gluten == "1");
   const [isSinTacc, setIsSinTacc] = useState(product?.sin_tacc == "1");
@@ -40,13 +46,30 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
-        const response = await axios.get(`${API_URL}/categorias.php`);
+        const response = await axios.get(
+          `${API_URL}/categorias_y_destacados.php`
+        );
         console.log("Categorías recibidas:", response.data);
-        
-        if (Array.isArray(response.data)) {
-          setCategories(response.data);
+
+        // ✅ Acceder a response.data.categorias y mapear al formato esperado
+        if (response.data.success && Array.isArray(response.data.categorias)) {
+          const categoriasFormateadas = response.data.categorias.map(
+            (cat: any) => ({
+              categoria: {
+                id: cat.id,
+                nombre: cat.nombre,
+                alias: cat.alias,
+              },
+              subcategorias: cat.subcategorias,
+            })
+          );
+
+          setCategories(categoriasFormateadas);
         } else {
-          console.error("La respuesta no es un array:", response.data);
+          console.error(
+            "La respuesta no tiene el formato esperado:",
+            response.data
+          );
           setCategories([]);
         }
       } catch (error) {
@@ -146,7 +169,11 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
     console.log("imageChanged:", imageChanged);
     console.log("================================");
 
-    if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0) {
+    if (
+      !name.trim() ||
+      !price.trim() ||
+      categorySubcategoryPairs.length === 0
+    ) {
       console.log("❌ Validación falló en edición");
       alert("Por favor completa todos los campos requeridos");
       return;
@@ -188,7 +215,9 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
       onClose();
     } catch (error) {
       console.error("Error editing product:", error);
-      alert("Error al editar el producto. Revisa la consola para más detalles.");
+      alert(
+        "Error al editar el producto. Revisa la consola para más detalles."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -256,9 +285,7 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
               onChange={handleFileChange}
               className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#658c5f] file:text-[#d9cebe] file:cursor-pointer hover:file:bg-[#5a7a54]"
             />
-            {imageError && (
-              <p className="text-red-600 text-sm">{imageError}</p>
-            )}
+            {imageError && <p className="text-red-600 text-sm">{imageError}</p>}
             <p className="text-xs text-black/60">
               Formatos permitidos: JPG, PNG, WEBP. Tamaño máximo: 3MB
             </p>
@@ -348,11 +375,15 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
               className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Selecciona una categoría</option>
-              {Array.isArray(categories) && categories.map((category) => (
-                <option key={category.categoria.id} value={category.categoria.id}>
-                  {category.categoria.nombre}
-                </option>
-              ))}
+              {Array.isArray(categories) &&
+                categories.map((category) => (
+                  <option
+                    key={category.categoria.id}
+                    value={category.categoria.id}
+                  >
+                    {category.categoria.nombre}
+                  </option>
+                ))}
             </select>
           </div>
         )}
@@ -370,11 +401,12 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
               className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Selecciona una subcategoría</option>
-              {Array.isArray(subcategories) && subcategories.map((subcategory) => (
-                <option key={subcategory.id} value={subcategory.id}>
-                  {subcategory.nombre}
-                </option>
-              ))}
+              {Array.isArray(subcategories) &&
+                subcategories.map((subcategory) => (
+                  <option key={subcategory.id} value={subcategory.id}>
+                    {subcategory.nombre}
+                  </option>
+                ))}
             </select>
           </div>
         )}
@@ -403,10 +435,12 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
                 className="p-4 border-2 border-[#c4b8a8] rounded-lg cursor-pointer hover:border-red-600 hover:bg-red-50 transition-colors"
               >
                 <p className="text-black">
-                  <strong>Categoría:</strong> {pair.categoria_nombre || "Categoría no disponible"}
+                  <strong>Categoría:</strong>{" "}
+                  {pair.categoria_nombre || "Categoría no disponible"}
                 </p>
                 <p className="text-black">
-                  <strong>Subcategoría:</strong> {pair.subcategoria_nombre || "Subcategoría no disponible"}
+                  <strong>Subcategoría:</strong>{" "}
+                  {pair.subcategoria_nombre || "Subcategoría no disponible"}
                 </p>
                 <p className="text-red-600 text-sm mt-2">
                   Haga clic para eliminar

@@ -5,44 +5,40 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export interface Categoria {
-  id: number;
-  nombre: string;
-}
-
 export interface Subcategoria {
   id: number;
   nombre: string;
+  foto: string;
 }
 
-export interface Producto {
+export interface Categoria {
+  id: number;
+  nombre: string;
+  alias: string;
+  subcategorias: Subcategoria[];
+}
+
+export interface Destacado {
   id: string;
   nombre: string;
   descripcion: string;
   precio: string;
-  precioespecial: string;
-  imagen?: string; // Asumiendo que la API puede devolver una imagen
-  categorias: Categoria[];
-  subcategorias: Subcategoria[];
+  precioespecial?: string;
+  imagen?: string;
   promocional?: string;
-  sin_gluten: string;
-  sin_tacc: string;
-  vegetariano: string;
-  vegano: string;
+  label?: string; // "Menú del Día", "Promo", "Recomendado", etc.
 }
 
-export interface CategoriaCompleta {
-  categoria: {
-    id: number;
-    nombre: string;
-  };
-  subcategorias: any[];
-  horarios: any[];
+export interface MenuData {
+  categorias: Categoria[];
+  destacados: Destacado[];
 }
 
 export function useMenuData() {
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [categorias, setCategorias] = useState<CategoriaCompleta[]>([]);
+  const [menuData, setMenuData] = useState<MenuData>({
+    categorias: [],
+    destacados: [],
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,13 +46,16 @@ export function useMenuData() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [productosRes, categoriasRes] = await Promise.all([
-          axios.get(`${API_URL}/productostotal.php`),
-          axios.get(`${API_URL}/categorias.php`),
-        ]);
-
-        setProductos(Array.isArray(productosRes.data) ? productosRes.data : []);
-        setCategorias(Array.isArray(categoriasRes.data) ? categoriasRes.data : []);
+        const response = await axios.get(`${API_URL}/categorias_y_destacados.php`);
+        
+        if (response.data.success) {
+          setMenuData({
+            categorias: response.data.categorias || [],
+            destacados: response.data.destacados || [],
+          });
+        } else {
+          setError("Error al cargar el menú");
+        }
       } catch (err) {
         console.error("Error fetching menu data:", err);
         setError("Error al cargar el menú");
@@ -68,14 +67,60 @@ export function useMenuData() {
     fetchData();
   }, []);
 
-  return { productos, categorias, loading, error };
+  return { ...menuData, loading, error };
 }
 
-// Helper para obtener productos por categoría
-export function getProductosByCategoria(productos: Producto[], categoriaId: number) {
-  return productos.filter((p) =>
-    p.categorias.some((c) => c.id === categoriaId)
-  );
+// Hook para obtener productos de una subcategoría específica
+// Hook para obtener productos de una subcategoría específica
+export function useProductosPorSubcategoria(alias: string, subcategoriaId: string) {
+  const [data, setData] = useState<{
+    productos: any[];
+    subcategoria: { id: number; nombre: string; descripcion: string } | null;
+    categoria: { id: number; alias: string } | null;
+    mostrarPrecioEspecial: boolean;
+  }>({
+    productos: [],
+    subcategoria: null,
+    categoria: null,
+    mostrarPrecioEspecial: false,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProductos = async () => {
+      if (!alias || !subcategoriaId) return;
+
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `${API_URL}/productos_por_categoria_subcategoria.php?alias=${alias}&subcategoria_id=${subcategoriaId}`
+        );
+
+        console.log("Productos recibidos:", response.data);
+
+        if (response.data.success) {
+          setData({
+            productos: response.data.productos || [],
+            subcategoria: response.data.subcategoria || null,
+            categoria: response.data.categoria || null,
+            mostrarPrecioEspecial: response.data.mostrar_precio_especial || false,
+          });
+        } else {
+          setError("Error al cargar los productos");
+        }
+      } catch (err) {
+        console.error("Error fetching productos:", err);
+        setError("Error al cargar los productos");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductos();
+  }, [alias, subcategoriaId]);
+
+  return { ...data, loading, error };
 }
 
 // Helper para crear slug desde nombre
@@ -83,7 +128,7 @@ export function createSlug(nombre: string): string {
   return nombre
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Elimina acentos
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }

@@ -63,12 +63,12 @@ const PromocionCard = ({
     >
       <div className="flex flex-col items-center space-y-3">
         {/* Drag Handle */}
-        <div
+        {/* <div
           ref={dragHandleRef}
           className="cursor-grab active:cursor-grabbing w-full flex justify-center py-2 hover:bg-[#c4b8a8] rounded transition-colors"
         >
           <GripVertical className="w-5 h-5 text-black/50" />
-        </div>
+        </div> */}
 
         {/* Imagen */}
         <div className="w-full aspect-square rounded-lg overflow-hidden border-2 border-[#c4b8a8]">
@@ -380,7 +380,7 @@ export default function Promociones({ onSuccess }: PromocionesProps) {
 
       {/* Grid de Promociones */}
       {!isLoading && promociones.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {promociones.map((promocion, index) => (
             <PromocionCard
               key={promocion.id}

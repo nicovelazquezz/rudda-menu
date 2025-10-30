@@ -34,7 +34,7 @@ const ModalEditSubcategoria = ({
     setIsLoading(true);
 
     try {
-      await axios.post(`${API_URL}/edit_subcategoria`, {
+      await axios.post(`${API_URL}/edit_subcategoria.php`, {
         id: subcategoria.id,
         nombre: nombre,
         descripcion: descripcion,
