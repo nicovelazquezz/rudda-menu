@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Package,
   Tag,
@@ -23,8 +24,7 @@ import Promociones from "@/components/gestion/products/Promociones";
 import ModalAddSubcategoria from "@/components/gestion/categorias/ModalAddSubcategoria";
 import ModalEditSubcategoria from "@/components/gestion/categorias/ModalEditSubcategoria";
 import axios from "axios";
-import { Producto, CategoriaConSubcategorias } from "@/lib/api";
-
+import { Producto, CategoriaConSubcategorias } from "@/lib/api"
 const menuItems = [
   { icon: Package, label: "Productos", value: "productos" },
   { icon: Tag, label: "Categorías", value: "categorias" },
@@ -148,8 +148,8 @@ const filteredSubcategorias =
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-[#c4b8a8] flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="p-6 border-b border-[#c4b8a8] bg-[#658c5f] flex items-center justify-between">
+            <div className="flex items-center gap-3 ">
               <img
                 src="/logo-rudda.png"
                 alt="Rudda Coffee Club Logo"
@@ -260,86 +260,108 @@ const filteredSubcategorias =
             </div>
           )}
 
-          {/* Productos Tab */}
-          {activeTab === "productos" && !loading && (
-            <div className="space-y-4">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Añadir Producto
-              </button>
+{/* Productos Tab */}
+{activeTab === "productos" && !loading && (
+  <div className="space-y-4">
+    <button
+      onClick={() => setIsModalOpen(true)}
+      className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+    >
+      <Plus className="w-5 h-5" />
+      Añadir Producto
+    </button>
 
-              {filteredProductos.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-black">No hay productos disponibles</p>
-                </div>
-              ) : (
-                <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-[#c4b8a8] border-b-2 border-[#b3a898]">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                            NOMBRE
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                            DESCRIPCIÓN
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                            PRECIO
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                            CATEGORÍA
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                            SUBCATEGORÍAS
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                            ACCIONES
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#c4b8a8]">
-                        {filteredProductos.map((producto) => (
-                          <tr
-                            key={producto.id}
-                            className="hover:bg-[#c4b8a8] transition-colors"
-                          >
-                            <td className="px-6 py-4 text-sm text-black font-medium">
-                              {producto.nombre}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-black/80">
-                              {producto.descripcion.substring(0, 50)}...
-                            </td>
-                            <td className="px-6 py-4 text-sm text-black font-medium">
-                              ${parseFloat(producto.precio).toFixed(2)}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-black/80">
-                              {producto.categorias.map(c => c.nombre).join(", ")}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-black/80">
-                              {producto.subcategorias.map(s => s.nombre).join(", ")}
-                            </td>
-                            <td className="px-6 py-4">
-                              <button
-                                onClick={() => handleEditProduct(producto)}
-                                className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
-                              >
-                                <Edit className="w-4 h-4" />
-                                Editar
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+    {filteredProductos.length === 0 ? (
+      <div className="text-center py-8">
+        <p className="text-black">No hay productos disponibles</p>
+      </div>
+    ) : (
+      <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#c4b8a8] border-b-2 border-[#b3a898]">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                  PRODUCTO
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                  DESCRIPCIÓN
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                  PRECIO
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                  CATEGORÍA
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                  SUBCATEGORÍAS
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                  ACCIONES
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#c4b8a8]">
+              {filteredProductos.map((producto) => (
+                <tr
+                  key={producto.id}
+                  className="hover:bg-[#c4b8a8] transition-colors"
+                >
+                  {/* Columna de Producto con imagen */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      {/* Miniatura de imagen */}
+                      <div className="relative h-12 w-12 shrink-0 rounded-lg overflow-hidden border-2 border-[#c4b8a8] bg-white/50">
+                        {producto.imagen ? (
+                          <Image
+                            src={producto.imagen}
+                            alt={producto.nombre}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-black/30">
+                            <Package className="w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Nombre del producto */}
+                      <span className="text-sm text-black font-medium">
+                        {producto.nombre}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-black/80">
+                    {producto.descripcion.substring(0, 50)}...
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black font-medium">
+                    ${parseFloat(producto.precio).toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black/80">
+                    {producto.categorias.map(c => c.nombre).join(", ")}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black/80">
+                    {producto.subcategorias.map(s => s.nombre).join(", ")}
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => handleEditProduct(producto)}
+                      className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
 {/* Subcategorías Tab */}
 {activeTab === "categorias" && !loading && (

@@ -9,7 +9,7 @@ import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Promocion {
-  id: number;
+  id: string;
   nombre: string;
   imagen: string;
   activo: string;

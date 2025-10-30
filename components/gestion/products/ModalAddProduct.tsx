@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import axios from "axios";
+import Image from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,16 +29,16 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
   const [isVegetarian, setIsVegetarian] = useState(false);
   const [isVegan, setIsVegan] = useState(false);
   const [promocional, setPromocional] = useState("");
+  const [imagen, setImagen] = useState(""); // <-- NUEVO
+  const [imageError, setImageError] = useState(""); // <-- NUEVO
 
   useEffect(() => {
-    // Fetch categories
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
         const response = await axios.get(`${API_URL}/categorias.php`);
         console.log("Categorías recibidas:", response.data);
         
-        // Asegurarnos de que sea un array
         if (Array.isArray(response.data)) {
           setCategories(response.data);
         } else {
@@ -57,7 +58,6 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
 
   useEffect(() => {
     if (categories.length > 0 && selectedCategory) {
-      // Find the selected category and its subcategories
       const category = categories.find(
         (cat) => cat.categoria.id === Number(selectedCategory)
       );
@@ -70,6 +70,35 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
       setSubcategories([]);
     }
   }, [selectedCategory, categories]);
+
+  // <-- NUEVA FUNCIÓN PARA MANEJAR LA IMAGEN
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setImageError("");
+
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setImageError("Solo se permiten archivos JPG, PNG o WEBP");
+      return;
+    }
+
+    // Validar tamaño (3MB = 3 * 1024 * 1024 bytes)
+    const maxSize = 3 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setImageError("La imagen no puede superar los 3MB");
+      return;
+    }
+
+    // Convertir a base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagen(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleAddPair = () => {
     if (
@@ -103,67 +132,64 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
     setCategorySubcategoryPairs(updatedPairs);
   };
 
-const handleAddProduct = async () => {
-  // 🔍 DEBUGGING - Ver qué valores tenemos
-  console.log("=== DEBUGGING AÑADIR PRODUCTO ===");
-  console.log("name:", name);
-  console.log("name.trim():", name.trim());
-  console.log("price:", price);
-  console.log("price.trim():", price.trim());
-  console.log("categorySubcategoryPairs:", categorySubcategoryPairs);
-  console.log("categorySubcategoryPairs.length:", categorySubcategoryPairs.length);
-  console.log("================================");
+  const handleAddProduct = async () => {
+    console.log("=== DEBUGGING AÑADIR PRODUCTO ===");
+    console.log("name:", name);
+    console.log("price:", price);
+    console.log("categorySubcategoryPairs:", categorySubcategoryPairs);
+    console.log("imagen:", imagen ? "Sí tiene imagen" : "No tiene imagen");
+    console.log("================================");
 
-  if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0) {
-    console.log("❌ Validación falló:");
-    console.log("  - name válido?", !!name.trim());
-    console.log("  - price válido?", !!price.trim());
-    console.log("  - pares válidos?", categorySubcategoryPairs.length > 0);
-    alert("Por favor completa todos los campos requeridos");
-    return;
-  }
+    if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0) {
+      console.log("❌ Validación falló");
+      alert("Por favor completa todos los campos requeridos");
+      return;
+    }
 
-  console.log("✅ Validación pasó, enviando producto...");
+    console.log("✅ Validación pasó, enviando producto...");
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const response = await axios.post(`${API_URL}/add-product.php`, {
-      nombre: name,
-      descripcion: description,
-      precio: price,
-      precioespecial: precioEspecial,
-      promocional: promocional,
-      vinculaciones: categorySubcategoryPairs,
-      sin_gluten: isGlutenFree ? 1 : 0,
-      sin_tacc: isSinTacc ? 1 : 0,
-      vegetariano: isVegetarian ? 1 : 0,
-      vegano: isVegan ? 1 : 0,
-    });
+    try {
+      const response = await axios.post(`${API_URL}/add-product.php`, {
+        nombre: name,
+        descripcion: description,
+        precio: price,
+        precioespecial: precioEspecial,
+        promocional: promocional,
+        imagen: imagen, // <-- NUEVO: Enviar imagen (puede estar vacía)
+        vinculaciones: categorySubcategoryPairs,
+        sin_gluten: isGlutenFree ? 1 : 0,
+        sin_tacc: isSinTacc ? 1 : 0,
+        vegetariano: isVegetarian ? 1 : 0,
+        vegano: isVegan ? 1 : 0,
+      });
 
-    console.log("Producto añadido:", response.data);
+      console.log("Producto añadido:", response.data);
 
-    if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess();
 
-    // Reset form
-    setName("");
-    setDescription("");
-    setPrice("");
-    setPrecioEspecial("");
-    setPromocional("");
-    setIsGlutenFree(false);
-    setIsSinTacc(false);
-    setIsVegetarian(false);
-    setIsVegan(false);
-    setCategorySubcategoryPairs([]);
-    onClose();
-  } catch (error) {
-    console.error("Error adding product:", error);
-    alert("Error al añadir el producto. Revisa la consola para más detalles.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // Reset form
+      setName("");
+      setDescription("");
+      setPrice("");
+      setPrecioEspecial("");
+      setPromocional("");
+      setImagen(""); // <-- NUEVO
+      setImageError(""); // <-- NUEVO
+      setIsGlutenFree(false);
+      setIsSinTacc(false);
+      setIsVegetarian(false);
+      setIsVegan(false);
+      setCategorySubcategoryPairs([]);
+      onClose();
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Error al añadir el producto. Revisa la consola para más detalles.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-[#d9cebe] rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -221,6 +247,47 @@ const handleAddProduct = async () => {
             rows={3}
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
+        </div>
+
+        {/* <-- NUEVO: CAMPO DE IMAGEN */}
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            Imagen del Producto (Opcional)
+          </label>
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleFileChange}
+              className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#658c5f] file:text-[#d9cebe] file:cursor-pointer hover:file:bg-[#5a7a54]"
+            />
+            {imageError && (
+              <p className="text-red-600 text-sm">{imageError}</p>
+            )}
+            <p className="text-xs text-black/60">
+              Formatos permitidos: JPG, PNG, WEBP. Tamaño máximo: 3MB
+            </p>
+          </div>
+
+          {/* Preview de la imagen */}
+          {imagen && !imageError && (
+            <div className="mt-3 flex justify-center">
+              <div className="relative w-48 h-48 rounded-lg overflow-hidden border-2 border-[#c4b8a8]">
+                <Image
+                  src={imagen}
+                  alt="Vista previa"
+                  fill
+                  className="object-cover"
+                />
+                <button
+                  onClick={() => setImagen("")}
+                  className="absolute top-2 right-2 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Promocional */}

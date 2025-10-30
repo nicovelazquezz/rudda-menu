@@ -37,6 +37,7 @@ export interface Producto {
   sin_tacc: string;
   vegetariano: string;
   vegano: string;
+  imagen: string;
 }
 
 export interface CategoriaConSubcategorias {

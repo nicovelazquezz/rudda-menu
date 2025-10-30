@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
+import Image from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -31,9 +32,11 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
   const [isVegan, setIsVegan] = useState(product?.vegano == "1");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [imagen, setImagen] = useState(product?.imagen || ""); // <-- NUEVO
+  const [imageError, setImageError] = useState(""); // <-- NUEVO
+  const [imageChanged, setImageChanged] = useState(false); // <-- NUEVO: Para saber si cambió la imagen
 
   useEffect(() => {
-    // Fetch categories
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
@@ -72,6 +75,36 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
     }
   }, [selectedCategory, categories]);
 
+  // <-- NUEVA FUNCIÓN PARA MANEJAR LA IMAGEN
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setImageError("");
+
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setImageError("Solo se permiten archivos JPG, PNG o WEBP");
+      return;
+    }
+
+    // Validar tamaño (3MB = 3 * 1024 * 1024 bytes)
+    const maxSize = 3 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setImageError("La imagen no puede superar los 3MB");
+      return;
+    }
+
+    // Convertir a base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagen(reader.result as string);
+      setImageChanged(true); // Marcar que la imagen cambió
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAddPair = () => {
     if (
       selectedCategory &&
@@ -105,11 +138,12 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
   };
 
   const handleEditProduct = async () => {
-    // 🔍 DEBUGGING
     console.log("=== DEBUGGING EDITAR PRODUCTO ===");
     console.log("name:", name);
     console.log("price:", price);
     console.log("categorySubcategoryPairs:", categorySubcategoryPairs);
+    console.log("imagen:", imagen ? "Sí tiene imagen" : "No tiene imagen");
+    console.log("imageChanged:", imageChanged);
     console.log("================================");
 
     if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0) {
@@ -123,7 +157,7 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/edit_product.php`, {
+      const payload: any = {
         id: product.id,
         nombre: name,
         descripcion: description,
@@ -138,7 +172,14 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
         sin_tacc: isSinTacc ? 1 : 0,
         vegetariano: isVegetarian ? 1 : 0,
         vegano: isVegan ? 1 : 0,
-      });
+      };
+
+      // Solo enviar imagen si cambió
+      if (imageChanged) {
+        payload.imagen = imagen;
+      }
+
+      const response = await axios.post(`${API_URL}/edit_product.php`, payload);
 
       console.log("Producto editado:", response.data);
 
@@ -201,6 +242,50 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
             rows={3}
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
+        </div>
+
+        {/* <-- NUEVO: CAMPO DE IMAGEN */}
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            Imagen del Producto (Opcional)
+          </label>
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleFileChange}
+              className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#658c5f] file:text-[#d9cebe] file:cursor-pointer hover:file:bg-[#5a7a54]"
+            />
+            {imageError && (
+              <p className="text-red-600 text-sm">{imageError}</p>
+            )}
+            <p className="text-xs text-black/60">
+              Formatos permitidos: JPG, PNG, WEBP. Tamaño máximo: 3MB
+            </p>
+          </div>
+
+          {/* Preview de la imagen */}
+          {imagen && !imageError && (
+            <div className="mt-3 flex justify-center">
+              <div className="relative w-48 h-48 rounded-lg overflow-hidden border-2 border-[#c4b8a8]">
+                <Image
+                  src={imagen}
+                  alt="Vista previa"
+                  fill
+                  className="object-cover"
+                />
+                <button
+                  onClick={() => {
+                    setImagen("");
+                    setImageChanged(true);
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Promocional */}
