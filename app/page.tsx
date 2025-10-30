@@ -88,7 +88,7 @@ export default function HomePage() {
           height={55}
           className="mx-auto"
         />
-      </header>
+      </header> 
 
       <div className="px-6 pt-4 pb-2">
         <h1 className="text-base font-normal text-accent mb-0.5">Elegí tu comida favorita</h1>
