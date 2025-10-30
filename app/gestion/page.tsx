@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Package,
   Tag,
@@ -20,87 +20,14 @@ import {
 import ModalProductAdd from "@/components/gestion/products/ModalAddProduct";
 import ModalProductEdit from "@/components/gestion/products/ModalEditProduct";
 import Promociones from "@/components/gestion/products/Promociones";
-
-// Datos mock
-const mockProductos = [
-  {
-    id: 1,
-    nombre: "KOLSCH - Jophiels",
-    descripcion: "Cuerpo liviano y suave a...",
-    precio: 4200.0,
-    categoria: "Nuestras Cervezas",
-    subcategoria: "cerveza",
-    especiales: "",
-  },
-  {
-    id: 2,
-    nombre: "SCOTCH - Jophiels",
-    descripcion: "Color cobrizo intenso co...",
-    precio: 4200.0,
-    categoria: "Nuestras Cervezas",
-    subcategoria: "cerveza",
-    especiales: "",
-  },
-  {
-    id: 3,
-    nombre: "GOLDEN - Garufa",
-    descripcion: "Refrescante y muy fácil ...",
-    precio: 4200.0,
-    categoria: "Nuestras Cervezas",
-    subcategoria: "cerveza",
-    especiales: "",
-  },
-  {
-    id: 4,
-    nombre: "HONEY - Columbus",
-    descripcion: "Cuerpo intenso, maltoso ...",
-    precio: 4200.0,
-    categoria: "Nuestras Cervezas",
-    subcategoria: "cerveza",
-    especiales: "",
-  },
-  {
-    id: 5,
-    nombre: "FRAMBUESA - Columbus",
-    descripcion: "Rojiza, maltosa con nota...",
-    precio: 4200.0,
-    categoria: "Nuestras Cervezas",
-    subcategoria: "cerveza",
-    especiales: "",
-  },
-];
-
-const mockCategorias = [
-  {
-    id: 1,
-    nombre: "Nuestras Cervezas",
-    subcategorias: [
-      { id: 1, nombre: "cerveza", descripcion: "Cervezas artesanales" },
-      { id: 2, nombre: "IPA", descripcion: "India Pale Ale" },
-      { id: 3, nombre: "Stout", descripcion: "Cervezas oscuras" },
-    ],
-  },
-  {
-    id: 2,
-    nombre: "Comidas",
-    subcategorias: [
-      { id: 4, nombre: "Pizzas", descripcion: "Pizzas artesanales" },
-      { id: 5, nombre: "Hamburguesas", descripcion: "Hamburguesas gourmet" },
-    ],
-  },
-  {
-    id: 3,
-    nombre: "Postres",
-    subcategorias: [
-      { id: 6, nombre: "Helados", descripcion: "Helados artesanales" },
-      { id: 7, nombre: "Tartas", descripcion: "Tartas caseras" },
-    ],
-  },
-];
+import ModalAddSubcategoria from "@/components/gestion/categorias/ModalAddSubcategoria";
+import ModalEditSubcategoria from "@/components/gestion/categorias/ModalEditSubcategoria";
+import axios from "axios";
+import { Producto, CategoriaConSubcategorias } from "@/lib/api";
 
 const menuItems = [
   { icon: Package, label: "Productos", value: "productos" },
-  { icon: Tag, label: "Subcategorías", value: "subcategorias" },
+  { icon: Tag, label: "Categorías", value: "categorias" },
   { icon: Percent, label: "Promociones", value: "promociones" },
   { icon: Users, label: "Clientes", value: "clientes" },
   { icon: Heart, label: "Beneficios", value: "beneficios" },
@@ -109,46 +36,107 @@ const menuItems = [
   { icon: Clock, label: "Horarios Especiales", value: "horarios" },
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function GestionDashboard() {
   const [activeTab, setActiveTab] = useState("productos");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<{
-    id: number;
-    nombre: string;
-    subcategorias: { id: number; nombre: string; descripcion: string }[];
-  } | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoriaConSubcategorias | null>(null);
+  
 
-  const filteredProductos = mockProductos.filter((p) =>
+  // Estados para API
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaConSubcategorias[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
+
+  const [isAddSubcategoriaModalOpen, setIsAddSubcategoriaModalOpen] = useState(false);
+const [isEditSubcategoriaModalOpen, setIsEditSubcategoriaModalOpen] = useState(false);
+const [selectedSubcategoria, setSelectedSubcategoria] = useState<any>(null);
+
+  // Fetch productos
+  const fetchProductos = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_URL}/productostotal.php`);
+      setProductos(response.data);
+    } catch (err) {
+      console.error("Error fetching productos:", err);
+      setError("Error al cargar los productos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch categorías
+  const fetchCategorias = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_URL}/categorias.php`);
+      setCategorias(response.data);
+    } catch (err) {
+      console.error("Error fetching categorías:", err);
+      setError("Error al cargar las categorías");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos al montar
+  useEffect(() => {
+    fetchProductos();
+    fetchCategorias();
+  }, []);
+
+  const filteredProductos = productos.filter((p) =>
     p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredSubcategorias =
-    selectedCategory?.subcategorias.filter((s) =>
-      s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+const filteredSubcategorias =
+  selectedCategory?.subcategorias?.filter((s) =>
+    s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   const handleProductAdded = () => {
-    // Aquí puedes recargar los productos desde la API
-    // Por ahora solo cerramos el modal
+    fetchProductos(); // Recargar productos
     setIsModalOpen(false);
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Producto) => {
     setSelectedProduct(product);
     setIsEditModalOpen(true);
   };
 
   const handleProductEdited = () => {
-    // Aquí puedes recargar los productos desde la API
+    fetchProductos(); // Recargar productos
     setIsEditModalOpen(false);
     setSelectedProduct(null);
   };
+
+  const handleDeleteSubcategoria = async (subcategoria: any) => {
+  if (!confirm(`¿Estás seguro de eliminar la subcategoría "${subcategoria.nombre}"?`)) {
+    return;
+  }
+
+  try {
+    await axios.post(`${API_URL}/delete_subcategoria`, {
+      id: subcategoria.id,
+    });
+    
+    fetchCategorias(); // Recargar categorías
+    alert("Subcategoría eliminada correctamente");
+  } catch (error) {
+    console.error("Error deleting subcategoria:", error);
+    alert("Error al eliminar la subcategoría");
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#d9cebe]">
@@ -182,10 +170,16 @@ export default function GestionDashboard() {
               <button
                 key={item.value}
                 onClick={() => setActiveTab(item.value)}
+                disabled={!["productos", "categorias", "promociones"].includes(
+                  item.value
+                )}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   activeTab === item.value
                     ? "bg-[#658c5f] text-[#d9cebe] shadow-lg"
                     : "text-black hover:bg-[#658c5f] hover:text-[#d9cebe]"
+                } ${
+                  !["productos", "categorias", "promociones"].includes(item.value) &&
+                  "cursor-not-allowed opacity-50"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -252,8 +246,22 @@ export default function GestionDashboard() {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-8">
+              <p className="text-black">Cargando...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+
           {/* Productos Tab */}
-          {activeTab === "productos" && (
+          {activeTab === "productos" && !loading && (
             <div className="space-y-4">
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -263,173 +271,175 @@ export default function GestionDashboard() {
                 Añadir Producto
               </button>
 
-              <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-[#c4b8a8] border-b-2 border-[#b3a898]">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          NOMBRE
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          DESCRIPCIÓN
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          PRECIO
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          CATEGORÍA
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          SUBCATEGORÍAS
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          ESPECIALES
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-black">
-                          ACCIONES
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#c4b8a8]">
-                      {filteredProductos.map((producto) => (
-                        <tr
-                          key={producto.id}
-                          className="hover:bg-[#c4b8a8] transition-colors"
-                        >
-                          <td className="px-6 py-4 text-sm text-black font-medium">
-                            {producto.nombre}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-black/80">
-                            {producto.descripcion}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-black font-medium">
-                            {producto.precio.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-black/80">
-                            {producto.categoria}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-black/80">
-                            {producto.subcategoria}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-black/80">
-                            {producto.especiales || "-"}
-                          </td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() => handleEditProduct(producto)}
-                              className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
-                            >
-                              <Edit className="w-4 h-4" />
-                              Editar
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {filteredProductos.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-black">No hay productos disponibles</p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Subcategorías Tab */}
-          {activeTab === "subcategorias" && (
-            <div className="space-y-6">
-              <h2 className="font-display text-xl text-black mb-4">
-                Categorías
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {mockCategorias.map((categoria) => (
-                  <button
-                    key={categoria.id}
-                    onClick={() => setSelectedCategory(categoria)}
-                    className={`p-6 rounded-lg text-left transition-all border-2 ${
-                      selectedCategory?.id === categoria.id
-                        ? "bg-[#658c5f] text-[#d9cebe] border-[#658c5f] shadow-lg scale-105"
-                        : "bg-[#d9cebe] text-black border-[#c4b8a8] hover:bg-[#658c5f] hover:text-[#d9cebe] hover:border-[#658c5f] hover:shadow-md"
-                    }`}
-                  >
-                    <h3 className="font-display text-xl">{categoria.nombre}</h3>
-                    <p className="text-sm mt-2 opacity-80">
-                      {categoria.subcategorias.length} subcategorías
-                    </p>
-                  </button>
-                ))}
-              </div>
-
-              {selectedCategory && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-display text-lg text-black">
-                      Subcategorías de {selectedCategory.nombre}
-                    </h3>
-                    <button className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      Añadir Subcategoría
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredSubcategorias.map((subcategoria) => (
-                      <div
-                        key={subcategoria.id}
-                        className="bg-[#d9cebe] p-6 rounded-lg border-2 border-[#c4b8a8] flex justify-between items-start group hover:border-[#658c5f] hover:shadow-md transition-all"
-                      >
-                        <div className="flex-1">
-                          <h4 className="font-medium text-black mb-1">
-                            {subcategoria.nombre}
-                          </h4>
-                          <p className="text-sm text-black/70">
-                            {subcategoria.descripcion}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] rounded transition-colors">
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+              ) : (
+                <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-[#c4b8a8] border-b-2 border-[#b3a898]">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            NOMBRE
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            DESCRIPCIÓN
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            PRECIO
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            CATEGORÍA
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            SUBCATEGORÍAS
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            ACCIONES
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#c4b8a8]">
+                        {filteredProductos.map((producto) => (
+                          <tr
+                            key={producto.id}
+                            className="hover:bg-[#c4b8a8] transition-colors"
+                          >
+                            <td className="px-6 py-4 text-sm text-black font-medium">
+                              {producto.nombre}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black/80">
+                              {producto.descripcion.substring(0, 50)}...
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black font-medium">
+                              ${parseFloat(producto.precio).toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black/80">
+                              {producto.categorias.map(c => c.nombre).join(", ")}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-black/80">
+                              {producto.subcategorias.map(s => s.nombre).join(", ")}
+                            </td>
+                            <td className="px-6 py-4">
+                              <button
+                                onClick={() => handleEditProduct(producto)}
+                                className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Editar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
             </div>
           )}
 
+{/* Subcategorías Tab */}
+{activeTab === "categorias" && !loading && (
+  <div className="space-y-6">
+    <h2 className="font-display text-xl text-black mb-4">
+      Categorías
+    </h2>
+
+    {categorias.length === 0 ? (
+      <div className="text-center py-8">
+        <p className="text-black">No hay categorías disponibles</p>
+      </div>
+    ) : (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {Array.isArray(categorias) && categorias.map((categoria) => (
+            <button
+              key={categoria.categoria.id}
+              onClick={() => setSelectedCategory(categoria)}
+              className={`p-6 rounded-lg text-left transition-all border-2 ${
+                selectedCategory?.categoria.id === categoria.categoria.id
+                  ? "bg-[#658c5f] text-[#d9cebe] border-[#658c5f] shadow-lg scale-105"
+                  : "bg-[#d9cebe] text-black border-[#658c5f] hover:bg-[#658c5f] hover:text-[#d9cebe] hover:border-[#658c5f] hover:shadow-md"
+              }`}
+            >
+              <h3 className="font-display text-xl">{categoria.categoria.nombre}</h3>
+              <p className="text-sm mt-2 opacity-80">
+                {categoria.subcategorias?.length || 0} subcategorías
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {selectedCategory && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg text-black">
+                Subcategorías de {selectedCategory.categoria.nombre}
+              </h3>
+                <button 
+                  onClick={() => setIsAddSubcategoriaModalOpen(true)}
+                  className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Añadir Subcategoría
+                </button>
+            </div>
+
+            {filteredSubcategorias.length === 0 ? (
+              <div className="text-center py-8 bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8]">
+                <p className="text-black">No hay subcategorías en esta categoría</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredSubcategorias.map((subcategoria) => (
+                  <div
+                    key={subcategoria.id}
+                    className="bg-[#d9cebe] p-6 rounded-lg border-2 border-[#c4b8a8] flex justify-between items-start group hover:border-[#658c5f] hover:shadow-md transition-all"
+                  >
+                    <div className="flex-1">
+                      <h4 className="font-medium text-black mb-1">
+                        {subcategoria.nombre}
+                      </h4>
+                      <p className="text-sm text-black/70">
+                        {subcategoria.descripcion || "Sin descripción"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+  <button 
+    onClick={() => {
+      setSelectedSubcategoria(subcategoria);
+      setIsEditSubcategoriaModalOpen(true);
+    }}
+    className="p-2 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] rounded transition-colors"
+  >
+    <Edit className="w-4 h-4" />
+  </button>
+  <button 
+    onClick={() => handleDeleteSubcategoria(subcategoria)}
+    className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+  >
+    <Trash2 className="w-4 h-4" />
+  </button>
+</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    )}
+  </div>
+)}
+
           {/* Promociones Tab */}
           {activeTab === "promociones" && <Promociones />}
-
-          {/* Placeholder para otras tabs */}
-          {!["productos", "subcategorias", "promociones"].includes(
-            activeTab
-          ) && (
-            <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] p-12 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="w-16 h-16 bg-[#c4b8a8] rounded-full flex items-center justify-center mx-auto mb-4">
-                  {React.createElement(
-                    menuItems.find((item) => item.value === activeTab)?.icon ||
-                      Package,
-                    {
-                      className: "w-8 h-8 text-black",
-                    }
-                  )}
-                </div>
-                <h3 className="font-display text-xl text-black mb-2">
-                  {menuItems.find((item) => item.value === activeTab)?.label}
-                </h3>
-                <p className="text-black/70">
-                  Esta sección estará disponible próximamente
-                </p>
-              </div>
-            </div>
-          )}
         </main>
       </div>
+
       {/* Modal Añadir Producto */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -439,6 +449,7 @@ export default function GestionDashboard() {
           />
         </div>
       )}
+
       {/* Modal Editar Producto */}
       {isEditModalOpen && selectedProduct && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -452,6 +463,41 @@ export default function GestionDashboard() {
           />
         </div>
       )}
+
+
+{/* Modal Añadir Subcategoría */}
+{isAddSubcategoriaModalOpen && selectedCategory && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <ModalAddSubcategoria
+      onClose={() => setIsAddSubcategoriaModalOpen(false)}
+      onSuccess={() => {
+        fetchCategorias();
+        setIsAddSubcategoriaModalOpen(false);
+      }}
+      categoriaId={selectedCategory.categoria.id}
+      categoriaNombre={selectedCategory.categoria.nombre}
+    />
+  </div>
+)}
+
+{/* Modal Editar Subcategoría */}
+{isEditSubcategoriaModalOpen && selectedSubcategoria && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <ModalEditSubcategoria
+      onClose={() => {
+        setIsEditSubcategoriaModalOpen(false);
+        setSelectedSubcategoria(null);
+      }}
+      onSuccess={() => {
+        fetchCategorias();
+        setIsEditSubcategoriaModalOpen(false);
+        setSelectedSubcategoria(null);
+      }}
+      subcategoria={selectedSubcategoria}
+    />
+  </div>
+)}
+
     </div>
   );
 }

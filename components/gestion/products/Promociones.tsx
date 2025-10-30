@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { draggable, dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Promocion {
   id: number;
@@ -140,7 +143,10 @@ const ModalAddPromocion = ({
   };
 
   const handleSubmit = async () => {
-    if (!titulo.trim() || !imagen.trim()) return;
+    if (!titulo.trim() || !imagen.trim()) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
     
     setIsLoading(true);
     await onAdd(titulo, imagen);
@@ -164,7 +170,7 @@ const ModalAddPromocion = ({
         <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-black mb-2">
-              Título de la promoción
+              Título de la promoción *
             </label>
             <input
               type="text"
@@ -177,7 +183,7 @@ const ModalAddPromocion = ({
 
           <div>
             <label className="block text-sm font-medium text-black mb-2">
-              Imagen
+              Imagen *
             </label>
             <input
               type="file"
@@ -224,6 +230,7 @@ const ModalAddPromocion = ({
 export default function Promociones({ onSuccess }: PromocionesProps) {
   const [promociones, setPromociones] = useState<Promocion[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showToast, setShowToast] = useState<{message: string; type: 'success' | 'error'} | null>(null);
 
   useEffect(() => {
@@ -241,45 +248,41 @@ export default function Promociones({ onSuccess }: PromocionesProps) {
   }, [showToast]);
 
   const fetchPromociones = async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch(
-        "https://cerveceriacolumbus.com.ar/api/obtener_promos.php"
-      );
-      const data = await response.json();
-      setPromociones(data);
+      const response = await axios.get(`${API_URL}/obtener_promos.php`);
+      console.log("Promociones obtenidas:", response.data);
+      
+      if (Array.isArray(response.data)) {
+        setPromociones(response.data);
+      } else {
+        setPromociones([]);
+      }
     } catch (error) {
       console.error("Error al obtener las promociones:", error);
       setShowToast({
         message: "Error al obtener las promociones",
         type: "error"
       });
+      setPromociones([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleAddPromocion = async (titulo: string, imagen: string) => {
     try {
-      const response = await fetch(
-        "https://cerveceriacolumbus.com.ar/api/agregar_promo.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            nombre: titulo,
-            imagen: imagen,
-            activo: "1",
-          }),
-        }
-      );
+      const response = await axios.post(`${API_URL}/agregar_promo.php`, {
+        nombre: titulo,
+        imagen: imagen,
+        activo: "1",
+      });
 
-      const data = await response.json();
+      console.log("Promoción añadida:", response.data);
 
-      if (data.message) {
-        setPromociones([
-          ...promociones,
-          { id: Date.now(), nombre: titulo, imagen: imagen, activo: "1" },
-        ]);
+      if (response.data) {
+        // Recargar promociones desde el servidor
+        await fetchPromociones();
         setIsModalOpen(false);
         setShowToast({
           message: "Promoción añadida correctamente",
@@ -299,27 +302,20 @@ export default function Promociones({ onSuccess }: PromocionesProps) {
   const handleToggleActivo = async (id: number, currentStatus: string) => {
     try {
       const newStatus = currentStatus === "1" ? "0" : "1";
-      await fetch(
-        "https://cerveceriacolumbus.com.ar/api/actualizar_estado_promo.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id,
-            activo: newStatus,
-          }),
-        }
-      );
+      
+      await axios.post(`${API_URL}/actualizar_estado_promo.php`, {
+        id,
+        activo: newStatus,
+      });
 
       setPromociones(
         promociones.map((promo) =>
           promo.id === id ? { ...promo, activo: newStatus } : promo
         )
       );
+      
       setShowToast({
-        message: "Estado actualizado correctamente",
+        message: `Promoción ${newStatus === "1" ? "activada" : "desactivada"} correctamente`,
         type: "success"
       });
     } catch (error) {
@@ -335,18 +331,12 @@ export default function Promociones({ onSuccess }: PromocionesProps) {
     if (!confirm("¿Estás seguro de que deseas eliminar esta promoción?")) return;
 
     try {
-      await fetch(
-        "https://cerveceriacolumbus.com.ar/api/eliminar_promo.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id }),
-        }
-      );
+      await axios.post(`${API_URL}/eliminar_promo.php`, {
+        id
+      });
 
       setPromociones(promociones.filter((promo) => promo.id !== id));
+      
       setShowToast({
         message: "Promoción eliminada correctamente",
         type: "success"
@@ -381,19 +371,30 @@ export default function Promociones({ onSuccess }: PromocionesProps) {
         Añadir Promoción
       </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {promociones.map((promocion, index) => (
-          <PromocionCard
-            key={promocion.id}
-            promocion={promocion}
-            index={index}
-            onToggleActivo={handleToggleActivo}
-            onDelete={handleDeletePromocion}
-          />
-        ))}
-      </div>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-8">
+          <p className="text-black">Cargando promociones...</p>
+        </div>
+      )}
 
-      {promociones.length === 0 && (
+      {/* Grid de Promociones */}
+      {!isLoading && promociones.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {promociones.map((promocion, index) => (
+            <PromocionCard
+              key={promocion.id}
+              promocion={promocion}
+              index={index}
+              onToggleActivo={handleToggleActivo}
+              onDelete={handleDeletePromocion}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && promociones.length === 0 && (
         <div className="bg-[#d9cebe] rounded-lg border-2 border-[#c4b8a8] p-12 text-center">
           <p className="text-black/70">
             No hay promociones. Añade una nueva promoción para comenzar.

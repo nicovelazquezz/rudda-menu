@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface ModalProductAddProps {
   onClose: () => void;
   onSuccess?: () => void;
@@ -14,32 +16,43 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("0");
   const [precioEspecial, setPrecioEspecial] = useState("");
-  const [ibu, setIbu] = useState("");
-  const [alc, setAlc] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [categorySubcategoryPairs, setCategorySubcategoryPairs] = useState<any[]>([]);
-  const [presentation, setPresentation] = useState("");
-  const [precio33cl, setPrecio33cl] = useState("");
-  const [precio50cl, setPrecio50cl] = useState("");
-  const [precio37cl, setPrecio37cl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isSinTacc, setIsSinTacc] = useState(false);
   const [isVegetarian, setIsVegetarian] = useState(false);
   const [isVegan, setIsVegan] = useState(false);
-  const [presentationType, setPresentationType] = useState("");
   const [promocional, setPromocional] = useState("");
 
   useEffect(() => {
     // Fetch categories
-    axios
-      .get("https://cerveceriacolumbus.com.ar/api/categorias")
-      .then((response) => {
-        setCategories(response.data);
-      });
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      try {
+        const response = await axios.get(`${API_URL}/categorias.php`);
+        console.log("Categorías recibidas:", response.data);
+        
+        // Asegurarnos de que sea un array
+        if (Array.isArray(response.data)) {
+          setCategories(response.data);
+        } else {
+          console.error("La respuesta no es un array:", response.data);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -48,7 +61,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
       const category = categories.find(
         (cat) => cat.categoria.id === Number(selectedCategory)
       );
-      if (category) {
+      if (category && Array.isArray(category.subcategorias)) {
         setSubcategories(category.subcategorias);
       } else {
         setSubcategories([]);
@@ -90,61 +103,67 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
     setCategorySubcategoryPairs(updatedPairs);
   };
 
-  const showIbuAlcFields = categorySubcategoryPairs.some(
-    (pair) => pair.categoryId === "1"
-  );
+const handleAddProduct = async () => {
+  // 🔍 DEBUGGING - Ver qué valores tenemos
+  console.log("=== DEBUGGING AÑADIR PRODUCTO ===");
+  console.log("name:", name);
+  console.log("name.trim():", name.trim());
+  console.log("price:", price);
+  console.log("price.trim():", price.trim());
+  console.log("categorySubcategoryPairs:", categorySubcategoryPairs);
+  console.log("categorySubcategoryPairs.length:", categorySubcategoryPairs.length);
+  console.log("================================");
 
-  const handleAddProduct = async () => {
-    if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0)
-      return;
+  if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0) {
+    console.log("❌ Validación falló:");
+    console.log("  - name válido?", !!name.trim());
+    console.log("  - price válido?", !!price.trim());
+    console.log("  - pares válidos?", categorySubcategoryPairs.length > 0);
+    alert("Por favor completa todos los campos requeridos");
+    return;
+  }
 
-    setIsLoading(true);
+  console.log("✅ Validación pasó, enviando producto...");
 
-    try {
-      await axios.post("https://cerveceriacolumbus.com.ar/api/add-product", {
-        nombre: name,
-        descripcion: description,
-        precio: price,
-        precioespecial: precioEspecial,
-        ibu,
-        alc,
-        presentacion: showIbuAlcFields ? presentationType : presentation,
-        promocional: promocional,
-        precio_33cl: precio33cl,
-        precio_50cl: precio50cl,
-        precio_37cl: precio37cl,
-        vinculaciones: categorySubcategoryPairs,
-        sin_gluten: isGlutenFree ? 1 : 0,
-        sin_tacc: isSinTacc ? 1 : 0,
-        vegetariano: isVegetarian ? 1 : 0,
-        vegano: isVegan ? 1 : 0,
-      });
+  setIsLoading(true);
 
-      if (onSuccess) onSuccess();
+  try {
+    const response = await axios.post(`${API_URL}/add-product.php`, {
+      nombre: name,
+      descripcion: description,
+      precio: price,
+      precioespecial: precioEspecial,
+      promocional: promocional,
+      vinculaciones: categorySubcategoryPairs,
+      sin_gluten: isGlutenFree ? 1 : 0,
+      sin_tacc: isSinTacc ? 1 : 0,
+      vegetariano: isVegetarian ? 1 : 0,
+      vegano: isVegan ? 1 : 0,
+    });
 
-      setName("");
-      setDescription("");
-      setPrice("");
-      setPrecioEspecial("");
-      setIbu("");
-      setAlc("");
-      setPresentation("");
-      setPrecio33cl("");
-      setPresentationType("");
-      setPrecio50cl("");
-      setPrecio37cl("");
-      setIsGlutenFree(false);
-      setIsSinTacc(false);
-      setIsVegetarian(false);
-      setIsVegan(false);
-      setCategorySubcategoryPairs([]);
-      onClose();
-    } catch (error) {
-      console.error("Error adding product:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    console.log("Producto añadido:", response.data);
+
+    if (onSuccess) onSuccess();
+
+    // Reset form
+    setName("");
+    setDescription("");
+    setPrice("");
+    setPrecioEspecial("");
+    setPromocional("");
+    setIsGlutenFree(false);
+    setIsSinTacc(false);
+    setIsVegetarian(false);
+    setIsVegan(false);
+    setCategorySubcategoryPairs([]);
+    onClose();
+  } catch (error) {
+    console.error("Error adding product:", error);
+    alert("Error al añadir el producto. Revisa la consola para más detalles.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="bg-[#d9cebe] rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -161,10 +180,25 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
 
       {/* Body */}
       <div className="p-6 space-y-4">
+        {/* Mensaje si no hay categorías */}
+        {!isLoadingCategories && categories.length === 0 && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+            <p className="font-bold">⚠️ No hay categorías disponibles</p>
+            <p className="text-sm">Por favor, crea categorías antes de añadir productos.</p>
+          </div>
+        )}
+
+        {/* Loading categorías */}
+        {isLoadingCategories && (
+          <div className="text-center py-4">
+            <p className="text-black">Cargando categorías...</p>
+          </div>
+        )}
+
         {/* Nombre del Producto */}
         <div>
           <label className="block text-sm font-medium text-black mb-2">
-            Nombre del Producto
+            Nombre del Producto *
           </label>
           <input
             type="text"
@@ -180,11 +214,11 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
           <label className="block text-sm font-medium text-black mb-2">
             Descripción del Producto
           </label>
-          <input
-            type="text"
+          <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descripción del producto"
+            rows={3}
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
         </div>
@@ -198,7 +232,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
             type="text"
             value={promocional}
             onChange={(e) => setPromocional(e.target.value)}
-            placeholder="Promocional: Sumale cheddar por $"
+            placeholder="Ej: Sumale cheddar por $500"
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
         </div>
@@ -206,7 +240,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
         {/* Precio */}
         <div>
           <label className="block text-sm font-medium text-black mb-2">
-            Precio
+            Precio *
           </label>
           <input
             type="number"
@@ -237,56 +271,66 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
         </div>
 
         {/* Categoría */}
-        <div>
-          <label className="block text-sm font-medium text-black mb-2">
-            Categoría
-          </label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f]"
-          >
-            <option value="">Selecciona una categoría</option>
-            {categories.map((category) => (
-              <option key={category.categoria.id} value={category.categoria.id}>
-                {category.categoria.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {!isLoadingCategories && (
+          <div>
+            <label className="block text-sm font-medium text-black mb-2">
+              Categoría *
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              disabled={categories.length === 0}
+              className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">Selecciona una categoría</option>
+              {Array.isArray(categories) && categories.map((category) => (
+                <option key={category.categoria.id} value={category.categoria.id}>
+                  {category.categoria.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Subcategoría */}
-        <div>
-          <label className="block text-sm font-medium text-black mb-2">
-            Subcategoría
-          </label>
-          <select
-            value={selectedSubcategory}
-            onChange={(e) => setSelectedSubcategory(e.target.value)}
-            disabled={!selectedCategory}
-            className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="">Selecciona una subcategoría</option>
-            {subcategories.map((subcategory) => (
-              <option key={subcategory.id} value={subcategory.id}>
-                {subcategory.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {!isLoadingCategories && (
+          <div>
+            <label className="block text-sm font-medium text-black mb-2">
+              Subcategoría *
+            </label>
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+              disabled={!selectedCategory || subcategories.length === 0}
+              className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">Selecciona una subcategoría</option>
+              {Array.isArray(subcategories) && subcategories.map((subcategory) => (
+                <option key={subcategory.id} value={subcategory.id}>
+                  {subcategory.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Botón agregar par */}
-        <button
-          onClick={handleAddPair}
-          disabled={!selectedCategory || !selectedSubcategory}
-          className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Agregar otra categoría/subcategoría
-        </button>
+        {!isLoadingCategories && (
+          <button
+            onClick={handleAddPair}
+            disabled={!selectedCategory || !selectedSubcategory}
+            className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Agregar otra categoría/subcategoría
+          </button>
+        )}
 
         {/* Lista de pares */}
         {categorySubcategoryPairs.length > 0 && (
           <div className="space-y-2">
+            <label className="block text-sm font-medium text-black mb-2">
+              Categorías y subcategorías asignadas:
+            </label>
             {categorySubcategoryPairs.map((pair, index) => (
               <div
                 key={index}
@@ -305,53 +349,6 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
               </div>
             ))}
           </div>
-        )}
-
-        {/* Campos IBU, ALC y Presentación */}
-        {showIbuAlcFields && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  IBU
-                </label>
-                <input
-                  type="text"
-                  value={ibu}
-                  onChange={(e) => setIbu(e.target.value)}
-                  placeholder="IBU"
-                  className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  ALC
-                </label>
-                <input
-                  type="number"
-                  value={alc}
-                  onChange={(e) => setAlc(e.target.value)}
-                  placeholder="ALC"
-                  className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">
-                Presentación
-              </label>
-              <select
-                value={presentationType}
-                onChange={(e) => setPresentationType(e.target.value)}
-                className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f]"
-              >
-                <option value="">Selecciona presentación</option>
-                <option value="copa">Copa</option>
-                <option value="pinta">Pinta</option>
-              </select>
-            </div>
-          </>
         )}
 
         {/* Opciones especiales */}
@@ -410,7 +407,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
         </button>
         <button
           onClick={handleAddProduct}
-          disabled={isLoading}
+          disabled={isLoading || categories.length === 0}
           className="flex-1 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Añadiendo..." : "Añadir"}

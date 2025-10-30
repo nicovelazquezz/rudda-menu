@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ModalProductEditProps {
   onClose: () => void;
@@ -14,46 +17,52 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
   const [description, setDescription] = useState(product?.descripcion || "");
   const [price, setPrice] = useState(product?.precio || "");
   const [precioEspecial, setPrecioEspecial] = useState(product?.precioespecial || "");
-  const [ibu, setIbu] = useState(product?.ibu || "");
-  const [alc, setAlc] = useState(product?.alc || "");
-  const [presentation, setPresentation] = useState(product?.type || "");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
-  const [precio33cl, setPrecio33cl] = useState(product?.precio33cl || "");
-  const [precio50cl, setPrecio50cl] = useState(product?.precio50cl || "");
-  const [precio37cl, setPrecio37cl] = useState(product?.precio37cl || "");
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [categorySubcategoryPairs, setCategorySubcategoryPairs] = useState<any[]>(
     product?.vinculaciones || []
   );
-  const [presentationType, setPresentationType] = useState(product?.type || "");
   const [promocional, setPromocional] = useState(product?.promocional || "");
   const [isGlutenFree, setIsGlutenFree] = useState(product?.sin_gluten == "1");
   const [isSinTacc, setIsSinTacc] = useState(product?.sin_tacc == "1");
   const [isVegetarian, setIsVegetarian] = useState(product?.vegetariano == "1");
   const [isVegan, setIsVegan] = useState(product?.vegano == "1");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   useEffect(() => {
     // Fetch categories
-    fetch("https://cerveceriacolumbus.com.ar/api/categorias")
-      .then((response) => response.json())
-      .then((data) => {
-        setCategories(data);
-      })
-      .catch((error) => {
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      try {
+        const response = await axios.get(`${API_URL}/categorias.php`);
+        console.log("Categorías recibidas:", response.data);
+        
+        if (Array.isArray(response.data)) {
+          setCategories(response.data);
+        } else {
+          console.error("La respuesta no es un array:", response.data);
+          setCategories([]);
+        }
+      } catch (error) {
         console.error("Error fetching categories:", error);
-      });
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     if (categories.length > 0 && selectedCategory) {
-      // Find the selected category and its subcategories
       const category = categories.find(
         (cat) => cat.categoria.id === Number(selectedCategory)
       );
-      if (category) {
+      if (category && Array.isArray(category.subcategorias)) {
         setSubcategories(category.subcategorias);
       } else {
         setSubcategories([]);
@@ -95,63 +104,50 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
     setCategorySubcategoryPairs(updatedPairs);
   };
 
-  const showIbuAlcFields = categorySubcategoryPairs.some(
-    (pair) => pair.categoria_id === "1"
-  );
-
   const handleEditProduct = async () => {
-    if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0)
+    // 🔍 DEBUGGING
+    console.log("=== DEBUGGING EDITAR PRODUCTO ===");
+    console.log("name:", name);
+    console.log("price:", price);
+    console.log("categorySubcategoryPairs:", categorySubcategoryPairs);
+    console.log("================================");
+
+    if (!name.trim() || !price.trim() || categorySubcategoryPairs.length === 0) {
+      console.log("❌ Validación falló en edición");
+      alert("Por favor completa todos los campos requeridos");
       return;
+    }
+
+    console.log("✅ Validación pasó, editando producto...");
 
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://cerveceriacolumbus.com.ar/api/edit_product", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: product.id,
-          nombre: name,
-          descripcion: description,
-          precio: price,
-          precioespecial: precioEspecial,
-          ibu,
-          alc,
-          precio_33cl: precio33cl,
-          precio_50cl: precio50cl,
-          precio_37cl: precio37cl,
-          promocional: promocional,
-          presentacion: showIbuAlcFields ? presentationType : presentation,
-          vinculaciones: categorySubcategoryPairs.map((pair) => ({
-            categoria_id: pair.categoria_id,
-            subcategoria_id: pair.subcategoria_id,
-          })),
-          sin_gluten: isGlutenFree ? 1 : 0,
-          sin_tacc: isSinTacc ? 1 : 0,
-          vegetariano: isVegetarian ? 1 : 0,
-          vegano: isVegan ? 1 : 0,
-        }),
+      const response = await axios.post(`${API_URL}/edit_product.php`, {
+        id: product.id,
+        nombre: name,
+        descripcion: description,
+        precio: price,
+        precioespecial: precioEspecial,
+        promocional: promocional,
+        vinculaciones: categorySubcategoryPairs.map((pair) => ({
+          categoria_id: pair.categoria_id,
+          subcategoria_id: pair.subcategoria_id,
+        })),
+        sin_gluten: isGlutenFree ? 1 : 0,
+        sin_tacc: isSinTacc ? 1 : 0,
+        vegetariano: isVegetarian ? 1 : 0,
+        vegano: isVegan ? 1 : 0,
       });
 
-      if (!response.ok) {
-        throw new Error("Error al editar el producto");
-      }
+      console.log("Producto editado:", response.data);
 
       if (onSuccess) onSuccess();
 
-      setName("");
-      setDescription("");
-      setPrice("");
-      setPrecioEspecial("");
-      setIbu("");
-      setAlc("");
-      setPresentation("");
-      setCategorySubcategoryPairs([]);
       onClose();
     } catch (error) {
       console.error("Error editing product:", error);
+      alert("Error al editar el producto. Revisa la consola para más detalles.");
     } finally {
       setIsLoading(false);
     }
@@ -172,10 +168,17 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
 
       {/* Body */}
       <div className="p-6 space-y-4">
+        {/* Loading categorías */}
+        {isLoadingCategories && (
+          <div className="text-center py-4">
+            <p className="text-black">Cargando categorías...</p>
+          </div>
+        )}
+
         {/* Nombre del Producto */}
         <div>
           <label className="block text-sm font-medium text-black mb-2">
-            Nombre del Producto
+            Nombre del Producto *
           </label>
           <input
             type="text"
@@ -191,11 +194,11 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
           <label className="block text-sm font-medium text-black mb-2">
             Descripción del Producto
           </label>
-          <input
-            type="text"
+          <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descripción del producto"
+            rows={3}
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
         </div>
@@ -209,7 +212,7 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
             type="text"
             value={promocional}
             onChange={(e) => setPromocional(e.target.value)}
-            placeholder="Promocional: Sumale cheddar por $"
+            placeholder="Ej: Sumale cheddar por $500"
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
         </div>
@@ -217,7 +220,7 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
         {/* Precio */}
         <div>
           <label className="block text-sm font-medium text-black mb-2">
-            Precio
+            Precio *
           </label>
           <input
             type="number"
@@ -248,56 +251,66 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
         </div>
 
         {/* Categoría */}
-        <div>
-          <label className="block text-sm font-medium text-black mb-2">
-            Categoría
-          </label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f]"
-          >
-            <option value="">Selecciona una categoría</option>
-            {categories.map((category) => (
-              <option key={category.categoria.id} value={category.categoria.id}>
-                {category.categoria.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {!isLoadingCategories && (
+          <div>
+            <label className="block text-sm font-medium text-black mb-2">
+              Categoría *
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              disabled={categories.length === 0}
+              className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">Selecciona una categoría</option>
+              {Array.isArray(categories) && categories.map((category) => (
+                <option key={category.categoria.id} value={category.categoria.id}>
+                  {category.categoria.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Subcategoría */}
-        <div>
-          <label className="block text-sm font-medium text-black mb-2">
-            Subcategoría
-          </label>
-          <select
-            value={selectedSubcategory}
-            onChange={(e) => setSelectedSubcategory(e.target.value)}
-            disabled={!selectedCategory}
-            className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="">Selecciona una subcategoría</option>
-            {subcategories.map((subcategory) => (
-              <option key={subcategory.id} value={subcategory.id}>
-                {subcategory.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {!isLoadingCategories && (
+          <div>
+            <label className="block text-sm font-medium text-black mb-2">
+              Subcategoría *
+            </label>
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+              disabled={!selectedCategory || subcategories.length === 0}
+              className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">Selecciona una subcategoría</option>
+              {Array.isArray(subcategories) && subcategories.map((subcategory) => (
+                <option key={subcategory.id} value={subcategory.id}>
+                  {subcategory.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Botón agregar par */}
-        <button
-          onClick={handleAddPair}
-          disabled={!selectedCategory || !selectedSubcategory}
-          className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Agregar otra categoría/subcategoría
-        </button>
+        {!isLoadingCategories && (
+          <button
+            onClick={handleAddPair}
+            disabled={!selectedCategory || !selectedSubcategory}
+            className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Agregar otra categoría/subcategoría
+          </button>
+        )}
 
         {/* Lista de pares */}
         {categorySubcategoryPairs.length > 0 && (
           <div className="space-y-2">
+            <label className="block text-sm font-medium text-black mb-2">
+              Categorías y subcategorías asignadas:
+            </label>
             {categorySubcategoryPairs.map((pair, index) => (
               <div
                 key={index}
@@ -316,53 +329,6 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
               </div>
             ))}
           </div>
-        )}
-
-        {/* Campos IBU, ALC y Presentación */}
-        {showIbuAlcFields && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  IBU
-                </label>
-                <input
-                  type="text"
-                  value={ibu}
-                  onChange={(e) => setIbu(e.target.value)}
-                  placeholder="IBU"
-                  className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  ALC
-                </label>
-                <input
-                  type="number"
-                  value={alc}
-                  onChange={(e) => setAlc(e.target.value)}
-                  placeholder="ALC"
-                  className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">
-                Presentación
-              </label>
-              <select
-                value={presentationType}
-                onChange={(e) => setPresentationType(e.target.value)}
-                className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f]"
-              >
-                <option value="">Selecciona presentación</option>
-                <option value="copa">Copa</option>
-                <option value="pinta">Pinta</option>
-              </select>
-            </div>
-          </>
         )}
 
         {/* Opciones especiales */}
@@ -421,7 +387,7 @@ const ModalProductEdit = ({ onClose, product, onSuccess }: ModalProductEditProps
         </button>
         <button
           onClick={handleEditProduct}
-          disabled={isLoading}
+          disabled={isLoading || categories.length === 0}
           className="flex-1 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Guardando..." : "Guardar Cambios"}
