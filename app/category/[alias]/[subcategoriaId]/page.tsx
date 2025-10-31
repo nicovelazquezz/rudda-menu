@@ -3,7 +3,7 @@
 import { use, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronDown, ChevronUp, ChevronRight } from "lucide-react"; // ← MODIFICADO: Agregar ChevronRight
+import { ChevronLeft, ChevronDown, ChevronUp, ChevronRight } from "lucide-react"; 
 import { useProductosPorSubcategoria } from "@/hooks/useMenuData";
 import BackToTop from "@/components/BackToTop";
 
@@ -257,7 +257,16 @@ export default function CategoryPage({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent" />
       </div>
-
+      
+            {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
+      {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
+      {subcategoria?.descripcion && (
+        <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
+          <p className="text-sm sm:text-base leading-relaxed text-white/80 text-start">
+            {subcategoria.descripcion}
+          </p>
+        </div>
+      )}
       {/* ==========================================
           ← NUEVA SECCIÓN: PRODUCTOS DESTACADOS
           ========================================== */}
