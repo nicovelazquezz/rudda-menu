@@ -9,7 +9,7 @@ import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Promocion {
-  id: string;
+  id: number;
   nombre: string;
   imagen: string;
   activo: string;
@@ -254,7 +254,12 @@ export default function Promociones({ onSuccess }: PromocionesProps) {
       console.log("Promociones obtenidas:", response.data);
       
       if (Array.isArray(response.data)) {
-        setPromociones(response.data);
+        // ← AGREGAR: Convertir IDs a number
+        const promocionesConvertidas = response.data.map((promo: any) => ({
+          ...promo,
+          id: Number(promo.id)
+        }));
+        setPromociones(promocionesConvertidas);
       } else {
         setPromociones([]);
       }
