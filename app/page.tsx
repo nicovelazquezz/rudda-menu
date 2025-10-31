@@ -14,10 +14,14 @@ export default function HomePage() {
     null
   );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef2 = useRef<HTMLDivElement>(null); // ← NUEVO: Para productos destacados
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollLeft2, setCanScrollLeft2] = useState(false); // ← NUEVO
+  const [canScrollRight2, setCanScrollRight2] = useState(true); // ← NUEVO
 
-  const { categorias, destacados, loading, error } = useMenuData();
+  // ← MODIFICADO: Agregar productosDestacados
+  const { categorias, destacados, productosDestacados, loading, error } = useMenuData();
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -28,19 +32,56 @@ export default function HomePage() {
     }
   };
 
+  // ← NUEVO: Función para scroll de productos destacados
+  const checkScroll2 = () => {
+    if (scrollContainerRef2.current) {
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef2.current;
+      setCanScrollLeft2(scrollLeft > 0);
+      setCanScrollRight2(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
   useEffect(() => {
     checkScroll();
+    checkScroll2(); // ← NUEVO
     const container = scrollContainerRef.current;
+    const container2 = scrollContainerRef2.current; // ← NUEVO
+    
     if (container) {
       container.addEventListener("scroll", checkScroll);
-      return () => container.removeEventListener("scroll", checkScroll);
     }
-  }, [destacados]);
+    
+    // ← NUEVO
+    if (container2) {
+      container2.addEventListener("scroll", checkScroll2);
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", checkScroll);
+      }
+      if (container2) {
+        container2.removeEventListener("scroll", checkScroll2);
+      }
+    };
+  }, [destacados, productosDestacados]); // ← MODIFICADO: Agregar productosDestacados
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
       const scrollAmount = 160;
       scrollContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // ← NUEVO: Función para scroll de productos destacados
+  const scroll2 = (direction: "left" | "right") => {
+    if (scrollContainerRef2.current) {
+      const scrollAmount = 160;
+      scrollContainerRef2.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
       });
@@ -208,9 +249,6 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-                <h3 className="font-medium text-xs text-accent mb-0.5">
-                  {item.nombre}
-                </h3>
                 <h3 className="font-medium text-xs text-accent mb-0.5 line-clamp-2">
                   {item.nombre}
                 </h3>
@@ -242,6 +280,88 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* ==========================================
+          ← NUEVA SECCIÓN: PRODUCTOS DESTACADOS 
+          ========================================== */}
+      {!searchQuery && productosDestacados && productosDestacados.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2.5 px-6">
+            <h2 className="text-sm font-semibold text-accent">
+              Recomendados 
+            </h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => scroll2("left")}
+                disabled={!canScrollLeft2}
+                className="p-1.5 rounded-lg bg-accent/30 border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/40 transition-colors"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="h-4 w-4 text-accent" />
+              </button>
+              <button
+                onClick={() => scroll2("right")}
+                disabled={!canScrollRight2}
+                className="p-1.5 rounded-lg bg-accent/30 border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/40 transition-colors"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="h-4 w-4 text-accent" />
+              </button>
+            </div>
+          </div>
+          <div
+            ref={scrollContainerRef2}
+            className="flex gap-3 overflow-x-auto pb-2 px-6 scrollbar-hide scroll-smooth"
+          >
+            {productosDestacados.map((producto) => (
+              <div key={producto.id} className="flex-shrink-0 w-36">
+                <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
+                  <Image
+                    src={producto.foto}
+                    alt={producto.nombre}
+                    fill
+                    className="object-cover"
+                  />
+                  {/* Badge Popular/Recomendado */}
+                  {producto.label && (
+                    <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 rounded-full py-1 flex items-center justify-center">
+                      <span className="text-[10px] font-semibold text-primary">
+                        {producto.label}
+                      </span>
+                    </div>
+                  )}
+                  
+                
+                </div>
+                
+                <h3 className="font-medium text-xs text-accent mb-0.5 line-clamp-2">
+                  {producto.nombre}
+                </h3>
+
+                {/* Mostrar precio especial si existe */}
+                {producto.precioespecial &&
+                parseFloat(producto.precioespecial) > 0 &&
+                parseFloat(producto.precioespecial) < parseFloat(producto.precio) ? (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] text-accent/60 line-through">
+                      ${parseFloat(producto.precio).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-accent font-bold">
+                      ${parseFloat(producto.precioespecial).toFixed(2)}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-accent font-bold">
+                    ${parseFloat(producto.precio).toFixed(2)}
+                  </p>
+                )}
+
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* ========================================== */}
 
       {/* Categorías y Subcategorías */}
       <div className="px-6">
