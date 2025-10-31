@@ -1,9 +1,8 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils"; // si no tenés cn, podés reemplazar por un simple join de clases
+import { cn } from "@/lib/utils";
 
 type Variant = "glass" | "gradientLeft" | "elevated";
 
@@ -30,6 +29,8 @@ export function CategoryCard({
         "group relative flex items-center gap-3 rounded-2xl p-3 transition-all",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/70",
         "active:scale-[0.99] min-h-20",
+        // ✅ NUEVO: Añadir max-width en desktop
+        "w-full md:max-w-md lg:max-w-lg",
         variant === "glass" &&
           "border border-white/20 bg-white/15 backdrop-blur-md shadow-[0_6px_24px_-8px_rgba(0,0,0,0.35)] hover:bg-white/20 dark:border-white/10 dark:bg-white/10",
         variant === "gradientLeft" &&
@@ -47,11 +48,10 @@ export function CategoryCard({
           sizes="64px"
           className="object-cover transition-transform duration-300 group-hover:scale-[1.05]"
         />
-        {/* overlay suave para legibilidad en glass */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/10 to-black/0" />
       </div>
 
-      {/* textos (solo color más oscuro) */}
+      {/* textos */}
       <div className="min-w-0 flex-1">
         <h3 className="text-[15px] font-semibold text-[#2e4b2a] leading-tight truncate">
           {name}
@@ -70,7 +70,7 @@ export function CategoryCard({
         aria-hidden
       />
 
-      {/* acentos decorativos por variante */}
+      {/* acentos decorativos */}
       {variant === "glass" && (
         <div
           aria-hidden

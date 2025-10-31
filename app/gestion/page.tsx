@@ -48,8 +48,6 @@ export default function GestionDashboard() {
   const [activeTab, setActiveTab] = useState("productos");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoriaConSubcategorias | null>(null);
 
   // Estados para API
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -60,6 +58,12 @@ export default function GestionDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null
+  );
+  const selectedCategory =
+    categorias.find((c) => c.categoria.id === selectedCategoryId) ?? null;
 
   const [isAddSubcategoriaModalOpen, setIsAddSubcategoriaModalOpen] =
     useState(false);
@@ -123,10 +127,9 @@ export default function GestionDashboard() {
     p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredSubcategorias =
-    selectedCategory?.subcategorias?.filter((s) =>
-      s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+  const filteredSubcategorias = (selectedCategory?.subcategorias ?? []).filter(
+    (s) => s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleProductAdded = () => {
     fetchProductos(); // Recargar productos
@@ -163,6 +166,32 @@ export default function GestionDashboard() {
     } catch (error) {
       console.error("Error deleting subcategoria:", error);
       alert("Error al eliminar la subcategoría");
+    }
+  };
+
+  const handleDeleteProduct = async (producto: Producto) => {
+    if (
+      !confirm(
+        `¿Estás seguro de eliminar "${
+          producto.nombre
+        }"?\n\nSe eliminará permanentemente de las siguientes categorías:\n${producto.categorias
+          .map((c) => `- ${c.nombre}`)
+          .join("\n")}`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await axios.post(`${API_URL}/delete_product.php`, {
+        id: producto.id,
+      });
+
+      fetchProductos(); // Recargar productos
+      alert("Producto eliminado correctamente");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("Error al eliminar el producto");
     }
   };
 
@@ -383,8 +412,37 @@ export default function GestionDashboard() {
                             <td className="px-6 py-4 text-sm text-black/80">
                               {producto.descripcion.substring(0, 50)}...
                             </td>
-                            <td className="px-6 py-4 text-sm text-black font-medium">
-                              ${parseFloat(producto.precio).toFixed(2)}
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-1">
+                                {producto.precioespecial &&
+                                parseFloat(producto.precioespecial) > 0 &&
+                                parseFloat(producto.precioespecial) <
+                                  parseFloat(producto.precio) ? (
+                                  <>
+                                    {/* Precio original tachado */}
+                                    <span className="text-xs text-black/50 line-through">
+                                      ${parseFloat(producto.precio).toFixed(2)}
+                                    </span>
+                                    {/* Precio especial destacado */}
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm text-[#658c5f] font-bold">
+                                        $
+                                        {parseFloat(
+                                          producto.precioespecial
+                                        ).toFixed(2)}
+                                      </span>
+                                      <span className="bg-[#658c5f] text-[#d9cebe] text-xs px-2 py-0.5 rounded-full font-medium">
+                                        OFERTA
+                                      </span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  /* Precio normal */
+                                  <span className="text-sm text-black font-medium">
+                                    ${parseFloat(producto.precio).toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-6 py-4 text-sm text-black/80">
                               {producto.categorias
@@ -397,13 +455,22 @@ export default function GestionDashboard() {
                                 .join(", ")}
                             </td>
                             <td className="px-6 py-4">
-                              <button
-                                onClick={() => handleEditProduct(producto)}
-                                className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
-                              >
-                                <Edit className="w-4 h-4" />
-                                Editar
-                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleEditProduct(producto)}
+                                  className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                  Editar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteProduct(producto)}
+                                  className="bg-red-900 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Eliminar
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -433,10 +500,11 @@ export default function GestionDashboard() {
                       categorias.map((categoria) => (
                         <button
                           key={categoria.categoria.id}
-                          onClick={() => setSelectedCategory(categoria)}
+                          onClick={() =>
+                            setSelectedCategoryId(categoria.categoria.id)
+                          }
                           className={`p-6 rounded-lg text-left transition-all border-2 ${
-                            selectedCategory?.categoria.id ===
-                            categoria.categoria.id
+                            selectedCategoryId === categoria.categoria.id
                               ? "bg-[#658c5f] text-[#d9cebe] border-[#658c5f] shadow-lg scale-105"
                               : "bg-[#d9cebe] text-black border-[#658c5f] hover:bg-[#658c5f] hover:text-[#d9cebe] hover:border-[#658c5f] hover:shadow-md"
                           }`}
@@ -521,10 +589,7 @@ export default function GestionDashboard() {
                                     </button>
                                   </div>
                                 </div>
-                                <p className="text-sm text-black/70">
-                                  {subcategoria.descripcion ||
-                                    "Sin descripción"}
-                                </p>
+
                                 <p className="text-xs text-black/50 mt-2">
                                   {subcategoria.count || 0} productos
                                 </p>
@@ -574,8 +639,8 @@ export default function GestionDashboard() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <ModalAddSubcategoria
             onClose={() => setIsAddSubcategoriaModalOpen(false)}
-            onSuccess={() => {
-              fetchCategorias();
+            onSuccess={async () => {
+              await fetchCategorias(); // ✅ Esperar a que termine
               setIsAddSubcategoriaModalOpen(false);
             }}
             categoriaId={selectedCategory.categoria.id}
@@ -592,8 +657,8 @@ export default function GestionDashboard() {
               setIsEditSubcategoriaModalOpen(false);
               setSelectedSubcategoria(null);
             }}
-            onSuccess={() => {
-              fetchCategorias();
+            onSuccess={async () => {
+              await fetchCategorias();
               setIsEditSubcategoriaModalOpen(false);
               setSelectedSubcategoria(null);
             }}

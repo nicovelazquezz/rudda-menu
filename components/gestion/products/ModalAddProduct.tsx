@@ -484,7 +484,7 @@ useEffect(() => {
         </button>
         <button
           onClick={handleAddProduct}
-          disabled={isLoading || categories.length === 0}
+          disabled={isLoading || isLoadingCategories || categories.length === 0 || categorySubcategoryPairs.length === 0 || !name.trim() || !price.trim()}
           className="flex-1 bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Añadiendo..." : "Añadir"}

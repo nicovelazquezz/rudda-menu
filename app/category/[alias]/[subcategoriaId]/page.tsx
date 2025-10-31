@@ -1,9 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useProductosPorSubcategoria } from "@/hooks/useMenuData";
 import BackToTop from "@/components/BackToTop";
 
@@ -26,6 +26,9 @@ function MenuItemRow({
   options?: { label: string; value: string }[];
   mostrarPrecioEspecial?: boolean;
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasLongDescription = description && description.length > 120;
+
   return (
     <div className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
       <div className="flex gap-4 p-3 sm:p-4">
@@ -53,27 +56,57 @@ function MenuItemRow({
             </h3>
             {/* precio */}
             <div className="shrink-0">
-              {mostrarPrecioEspecial && specialPrice ? (
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className="text-xs text-white/50 line-through">
-                    ${parseFloat(price).toFixed(2)}
-                  </span>
-                  <span className="rounded-lg bg-accent/20 px-2.5 py-1 text-sm font-bold text-accent">
-                    ${parseFloat(specialPrice).toFixed(2)}
-                  </span>
-                </div>
+              {mostrarPrecioEspecial && specialPrice && Number(specialPrice) > 0 ? (
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="text-xs text-white/50 line-through">
+              ${Math.trunc(Number(price))}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-lg bg-accent/20 px-2.5 py-1 text-sm font-bold text-accent">
+                ${Math.trunc(Number(specialPrice))}
+              </span>
+              <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                OFERTA
+              </span>
+            </div>
+          </div>
               ) : (
-                <span className="rounded-lg bg-accent/20 px-2.5 py-1 text-sm font-bold text-accent">
-                  ${parseFloat(price).toFixed(2)}
-                </span>
+          <span className="rounded-lg bg-accent/20 px-2.5 py-1 text-sm font-bold text-accent">
+            ${Math.trunc(Number(price))}
+          </span>
               )}
             </div>
           </div>
 
+          {/* Descripción con expand/collapse */}
           {description && (
-            <p className="mt-1 text-xs leading-relaxed text-white/80 line-clamp-3">
-              {description}
-            </p>
+            <div className="mt-1">
+              <p
+                className={`text-xs leading-relaxed text-white/80 ${
+                  !isExpanded && hasLongDescription ? "line-clamp-3" : ""
+                }`}
+              >
+                {description}
+              </p>
+              
+              {/* Botón "Ver más/menos" solo si la descripción es larga */}
+              {hasLongDescription && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="mt-1 flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors font-medium"
+                >
+                  {isExpanded ? (
+                    <>
+                      Ver menos <ChevronUp className="w-3 h-3" />
+                    </>
+                  ) : (
+                    <>
+                      Ver más <ChevronDown className="w-3 h-3" />
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           )}
 
           {promocional && (
@@ -136,7 +169,7 @@ export default function CategoryPage({
     <div className="min-h-screen bg-primary text-primary-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/10">
-        <div className="flex items-center gap-3 px-6 py-3">
+        <div className="flex items-center gap-3 px-6 py-3 max-w-7xl mx-auto">
           <Link
             href="/"
             className="flex items-center justify-center h-9 w-9 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
@@ -159,6 +192,51 @@ export default function CategoryPage({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent" />
       </div>
+
+      {/* Items - Mejorado para Desktop */}
+      <div className="px-6 py-6 max-w-7xl mx-auto">
+        {productos.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-white/70">No hay productos en esta categoría</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {productos.map((item: any) => {
+              // Crear array de opciones basado en características del producto
+              const options = [];
+              if (item.sin_gluten === "1")
+                options.push({ label: "Sin Gluten", value: "gluten-free" });
+              if (item.sin_tacc === "1")
+                options.push({ label: "Sin TACC", value: "tacc-free" });
+              if (item.vegetariano === "1")
+                options.push({ label: "Vegetariano", value: "vegetarian" });
+              if (item.vegano === "1")
+                options.push({ label: "Vegano", value: "vegan" });
+
+              return (
+                <MenuItemRow
+                  key={item.id}
+                  name={item.name}
+                  description={item.description}
+                  price={item.price}
+                  specialPrice={item.special_price}
+                  image={item.photo}
+                  promocional={item.promotion}
+                  options={options}
+                  mostrarPrecioEspecial={mostrarPrecioEspecial}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="h-6" />
+      <BackToTop />
+    </div>
+  );
+}
+
 
 
 
@@ -192,45 +270,3 @@ export default function CategoryPage({
         </div>
       )}
       */}
-
-      {/* Items */}
-      <div className="px-6 py-6 space-y-4">
-        {productos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-white/70">No hay productos en esta categoría</p>
-          </div>
-        ) : (
-          productos.map((item: any) => {
-            // Crear array de opciones basado en características del producto
-            const options = [];
-            if (item.sin_gluten === "1")
-              options.push({ label: "Sin Gluten", value: "gluten-free" });
-            if (item.sin_tacc === "1")
-              options.push({ label: "Sin TACC", value: "tacc-free" });
-            if (item.vegetariano === "1")
-              options.push({ label: "Vegetariano", value: "vegetarian" });
-            if (item.vegano === "1")
-              options.push({ label: "Vegano", value: "vegan" });
-
-            return (
-              <MenuItemRow
-                key={item.id}
-                name={item.name}
-                description={item.description}
-                price={item.price}
-                specialPrice={item.special_price}
-                image={item.photo}
-                promocional={item.promotion}
-                options={options}
-                mostrarPrecioEspecial={mostrarPrecioEspecial}
-              />
-            );
-          })
-        )}
-      </div>
-
-      <div className="h-6" />
-         <BackToTop />
-    </div>
-  );
-}

@@ -10,7 +10,9 @@ import BackToTop from "@/components/BackToTop";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null
+  );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -19,7 +21,8 @@ export default function HomePage() {
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
     }
@@ -75,9 +78,18 @@ export default function HomePage() {
             />
           </div>
           <div className="flex gap-2">
-            <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-            <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-            <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div
+              className="w-2 h-2 bg-accent rounded-full animate-bounce"
+              style={{ animationDelay: "0ms" }}
+            />
+            <div
+              className="w-2 h-2 bg-accent rounded-full animate-bounce"
+              style={{ animationDelay: "150ms" }}
+            />
+            <div
+              className="w-2 h-2 bg-accent rounded-full animate-bounce"
+              style={{ animationDelay: "300ms" }}
+            />
           </div>
         </div>
       </div>
@@ -199,7 +211,32 @@ export default function HomePage() {
                 <h3 className="font-medium text-xs text-accent mb-0.5">
                   {item.nombre}
                 </h3>
-                <p className="text-xs text-accent font-bold">${item.precio}</p>
+                <h3 className="font-medium text-xs text-accent mb-0.5 line-clamp-2">
+                  {item.nombre}
+                </h3>
+
+                {/* Mostrar precio especial si existe */}
+                {item.precioespecial &&
+                parseFloat(item.precioespecial) > 0 &&
+                parseFloat(item.precioespecial) < parseFloat(item.precio) ? (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] text-accent/60 line-through">
+                      ${parseFloat(item.precio).toFixed(2)}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs text-accent font-bold">
+                        ${parseFloat(item.precioespecial).toFixed(2)}
+                      </p>
+                      <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">
+                        OFERTA
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-accent font-bold">
+                    ${parseFloat(item.precio).toFixed(2)}
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -211,7 +248,6 @@ export default function HomePage() {
         {/* Header con Chips de Categorías */}
         {!searchQuery && (
           <div className="flex items-center gap-3 mb-3 overflow-x-auto scrollbar-hide pb-2">
-
             <div className="flex gap-2">
               {/* Chip "Todas" */}
               <button
@@ -260,7 +296,7 @@ export default function HomePage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
             {filteredSubcategorias.map((sub: any) => {
               const categoria = categorias.find((c) =>
                 c.subcategorias.some((s) => s.id === sub.id)
@@ -269,7 +305,9 @@ export default function HomePage() {
               return (
                 <CategoryCard
                   key={`${sub.id}-${categoria?.id || "all"}`}
-                  href={`/category/${categoria?.alias || sub.categoriaAlias}/${sub.id}`}
+                  href={`/category/${categoria?.alias || sub.categoriaAlias}/${
+                    sub.id
+                  }`}
                   name={sub.nombre}
                   itemCount={sub.count}
                   image={sub.foto}
