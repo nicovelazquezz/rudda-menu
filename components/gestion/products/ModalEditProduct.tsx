@@ -336,8 +336,10 @@ const ModalProductEdit = ({
           </label>
           <input
             type="number"
+            step="1"
+            min="0"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => setPrice(Math.trunc(Number(e.target.value)).toString())}
             placeholder="Precio del producto"
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
@@ -350,8 +352,10 @@ const ModalProductEdit = ({
           </label>
           <input
             type="number"
+            step="1"
+            min="0"
             value={precioEspecial}
-            onChange={(e) => setPrecioEspecial(e.target.value)}
+            onChange={(e) => setPrecioEspecial(e.target.value ? Math.trunc(Number(e.target.value)).toString() : "")}
             placeholder="Precio promocional (opcional)"
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />

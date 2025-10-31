@@ -32,39 +32,39 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
   const [imagen, setImagen] = useState(""); // <-- NUEVO
   const [imageError, setImageError] = useState(""); // <-- NUEVO
 
-useEffect(() => {
-  const fetchCategories = async () => {
-    setIsLoadingCategories(true);
-    try {
-      const response = await axios.get(`${API_URL}/categorias_y_destacados.php`);
-      console.log("Categorías recibidas:", response.data);
-      
-      // ✅ Acceder a response.data.categorias y mapear al formato esperado
-      if (response.data.success && Array.isArray(response.data.categorias)) {
-        const categoriasFormateadas = response.data.categorias.map((cat: any) => ({
-          categoria: {
-            id: cat.id,
-            nombre: cat.nombre,
-            alias: cat.alias,
-          },
-          subcategorias: cat.subcategorias,
-        }));
-        
-        setCategories(categoriasFormateadas);
-      } else {
-        console.error("La respuesta no tiene el formato esperado:", response.data);
-        setCategories([]);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      setCategories([]);
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      try {
+        const response = await axios.get(`${API_URL}/categorias_y_destacados.php`);
+        console.log("Categorías recibidas:", response.data);
 
-  fetchCategories();
-}, []);
+        // ✅ Acceder a response.data.categorias y mapear al formato esperado
+        if (response.data.success && Array.isArray(response.data.categorias)) {
+          const categoriasFormateadas = response.data.categorias.map((cat: any) => ({
+            categoria: {
+              id: cat.id,
+              nombre: cat.nombre,
+              alias: cat.alias,
+            },
+            subcategorias: cat.subcategorias,
+          }));
+
+          setCategories(categoriasFormateadas);
+        } else {
+          console.error("La respuesta no tiene el formato esperado:", response.data);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (categories.length > 0 && selectedCategory) {
@@ -321,8 +321,10 @@ useEffect(() => {
           </label>
           <input
             type="number"
+            step="1"
+            min="0"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => setPrice(Math.trunc(Number(e.target.value)).toString())}
             placeholder="Precio del producto"
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
@@ -335,8 +337,10 @@ useEffect(() => {
           </label>
           <input
             type="number"
+            step="1"
+            min="0"
             value={precioEspecial}
-            onChange={(e) => setPrecioEspecial(e.target.value)}
+            onChange={(e) => setPrecioEspecial(e.target.value ? Math.trunc(Number(e.target.value)).toString() : "")}
             placeholder="Precio promocional (opcional)"
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
