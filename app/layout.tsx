@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Rudda Coffee Club - Menú Digital",
@@ -15,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>{children}</body>
+      <body className="antialiased" suppressHydrationWarning>{children}<Footer /></body>
     </html>
   )
 }

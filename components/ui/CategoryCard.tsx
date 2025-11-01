@@ -12,6 +12,7 @@ export interface CategoryCardProps {
   itemCount: number | string;
   image: string;
   variant?: Variant;
+  sponsorLogo?: string; // ← AGREGAR ESTA LÍNEA
 }
 
 export function CategoryCard({
@@ -20,6 +21,7 @@ export function CategoryCard({
   itemCount,
   image,
   variant = "glass",
+  sponsorLogo,
 }: CategoryCardProps) {
   return (
     <Link
@@ -42,7 +44,7 @@ export function CategoryCard({
       {/* imagen */}
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-black/5">
         <Image
-          src={image || "/placeholder.svg"}
+          src={image || "/placeholder-producto.webp"}
           alt={name}
           fill
           sizes="64px"
@@ -51,14 +53,26 @@ export function CategoryCard({
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/10 to-black/0" />
       </div>
 
-      {/* textos */}
       <div className="min-w-0 flex-1">
         <h3 className="text-[15px] font-semibold text-[#2e4b2a] leading-tight truncate">
           {name}
         </h3>
-        <p className="mt-0.5 text-[12px] text-[#2e4b2a]/80">
-          {itemCount} items
-        </p>
+        {sponsorLogo && (
+          <div className="flex items-center gap-1 mt-2 ">
+            <div className="bg-white/5 backdrop-blur-sm rounded-md p-1 shadow-sm flex items-center gap-1 pl-2">
+              <span className="text-[12px] font-semibold text-[#2e4b2a]/60">
+                Powered by
+              </span>
+              <Image
+                src={sponsorLogo}
+                alt="Sponsor"
+                width={48}
+                height={32}
+                className="object-contain"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* chevron */}

@@ -3,7 +3,12 @@
 import { use, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronDown, ChevronUp, ChevronRight } from "lucide-react"; 
+import {
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+} from "lucide-react";
 import { useProductosPorSubcategoria } from "@/hooks/useMenuData";
 import BackToTop from "@/components/BackToTop";
 
@@ -56,7 +61,9 @@ function MenuItemRow({
             </h3>
             {/* precio */}
             <div className="shrink-0">
-              {mostrarPrecioEspecial && specialPrice && Number(specialPrice) > 0 ? (
+              {mostrarPrecioEspecial &&
+              specialPrice &&
+              Number(specialPrice) > 0 ? (
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="text-xs text-white/50 line-through">
                     ${Math.trunc(Number(price))}
@@ -88,7 +95,7 @@ function MenuItemRow({
               >
                 {description}
               </p>
-              
+
               {/* Botón "Ver más/menos" solo si la descripción es larga */}
               {hasLongDescription && (
                 <button
@@ -146,6 +153,11 @@ export default function CategoryPage({
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [productosDestacados, setProductosDestacados] = useState<any[]>([]);
 
+  // ← NUEVO: Determinar si debe mostrar sponsor
+  const shouldShowSponsor =
+    subcategoria?.nombre === "Signature Drinks" ||
+    subcategoria?.nombre === "Smoothies Energeticos";
+
   // ← NUEVO: Función para mezclar y seleccionar productos aleatorios
   useEffect(() => {
     if (productos.length > 0) {
@@ -160,17 +172,17 @@ export default function CategoryPage({
 
       // Filtrar productos con foto
       const productosConFoto = productos.filter((p: any) => p.photo);
-      
+
       // Mezclar y tomar 3 aleatorios
       const aleatorios = shuffleArray(productosConFoto).slice(0, 3);
-      
+
       // Asignar badges
       const badges = ["Popular", "Recomendado"];
       const destacados = aleatorios.map((producto: any, index: number) => ({
         ...producto,
-        label: badges[index % badges.length]
+        label: badges[index % badges.length],
       }));
-      
+
       setProductosDestacados(destacados);
     }
   }, [productos]);
@@ -178,7 +190,8 @@ export default function CategoryPage({
   // ← NUEVO: Función para verificar scroll
   const checkScroll = () => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
     }
@@ -233,16 +246,16 @@ export default function CategoryPage({
   return (
     <div className="min-h-screen bg-primary text-primary-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/10">
-        <div className="flex items-center gap-3 px-6 py-3 max-w-7xl mx-auto">
+      <header className="sticky top-0 z-50 bg-primary/98 backdrop-blur-xl border-b border-white/10 shadow-xl">
+        <div className="flex items-center gap-3 px-6 py-4 max-w-7xl mx-auto">
           <Link
             href="/"
-            className="flex items-center justify-center h-9 w-9 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+            className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 transition-all"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-5 w-5 text-white" />
           </Link>
-          <h1 className="text-lg font-medium flex-1">
-            {subcategoria?.nombre || "Productos"}
+          <h1 className="text-xl font-semibold text-white tracking-tight">
+            {subcategoria?.nombre}
           </h1>
         </div>
       </header>
@@ -257,8 +270,7 @@ export default function CategoryPage({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent" />
       </div>
-      
-            {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
+
       {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
       {subcategoria?.descripcion && (
         <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
@@ -297,7 +309,7 @@ export default function CategoryPage({
               </div>
             )}
           </div>
-          
+
           <div
             ref={scrollContainerRef}
             className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
@@ -320,15 +332,15 @@ export default function CategoryPage({
                     </div>
                   )}
                 </div>
-                
+
                 <h3 className="font-medium text-xs text-white mb-0.5 line-clamp-2">
                   {producto.name}
                 </h3>
 
                 {/* Mostrar precio (sin badge de oferta) */}
-                {mostrarPrecioEspecial && 
-                 producto.special_price && 
-                 Number(producto.special_price) > 0 ? (
+                {mostrarPrecioEspecial &&
+                producto.special_price &&
+                Number(producto.special_price) > 0 ? (
                   <div className="flex flex-col gap-0.5">
                     <p className="text-[10px] text-white/50 line-through">
                       ${Math.trunc(Number(producto.price))}
@@ -348,6 +360,24 @@ export default function CategoryPage({
         </div>
       )}
       {/* ========================================== */}
+
+      {/* ← NUEVO: Badge Sponsor - Solo para categorías patrocinadas */}
+      {shouldShowSponsor && (
+        <div className="px-6  max-w-7xl mx-auto">
+          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 shadow-sm flex items-center justify-center gap-2">
+            <span className="text-[16px] font-bold text-white/70">
+              Powered by
+            </span>
+            <Image
+              src="/ena-sport.png"
+              alt="ENA Sport"
+              width={56}
+              height={37}
+              className="object-contain"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Items - Mejorado para Desktop */}
       <div className="px-6 py-6 max-w-7xl mx-auto">

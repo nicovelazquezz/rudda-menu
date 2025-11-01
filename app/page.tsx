@@ -21,7 +21,8 @@ export default function HomePage() {
   const [canScrollRight2, setCanScrollRight2] = useState(true); // ← NUEVO
 
   // ← MODIFICADO: Agregar productosDestacados
-  const { categorias, destacados, productosDestacados, loading, error } = useMenuData();
+  const { categorias, destacados, productosDestacados, loading, error } =
+    useMenuData();
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -47,16 +48,16 @@ export default function HomePage() {
     checkScroll2(); // ← NUEVO
     const container = scrollContainerRef.current;
     const container2 = scrollContainerRef2.current; // ← NUEVO
-    
+
     if (container) {
       container.addEventListener("scroll", checkScroll);
     }
-    
+
     // ← NUEVO
     if (container2) {
       container2.addEventListener("scroll", checkScroll2);
     }
-    
+
     return () => {
       if (container) {
         container.removeEventListener("scroll", checkScroll);
@@ -170,13 +171,13 @@ export default function HomePage() {
         <Image
           src="/logo-rudda.png"
           alt="Rudda Coffee Club"
-          width={200}
-          height={55}
+          width={250}
+          height={100}
           className="mx-auto"
         />
       </header>
 
-      <div className="px-6 pt-4 pb-2">
+      <div className="px-6 pb-2">
         <h1 className="text-base font-normal text-accent mb-0.5">
           Elegí tu comida favorita
         </h1>
@@ -284,83 +285,83 @@ export default function HomePage() {
       {/* ==========================================
           ← NUEVA SECCIÓN: PRODUCTOS DESTACADOS 
           ========================================== */}
-      {!searchQuery && productosDestacados && productosDestacados.length > 0 && (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2.5 px-6">
-            <h2 className="text-sm font-semibold text-accent">
-              Recomendados 
-            </h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => scroll2("left")}
-                disabled={!canScrollLeft2}
-                className="p-1.5 rounded-lg bg-accent/30 border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/40 transition-colors"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="h-4 w-4 text-accent" />
-              </button>
-              <button
-                onClick={() => scroll2("right")}
-                disabled={!canScrollRight2}
-                className="p-1.5 rounded-lg bg-accent/30 border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/40 transition-colors"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="h-4 w-4 text-accent" />
-              </button>
+      {!searchQuery &&
+        productosDestacados &&
+        productosDestacados.length > 0 && (
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-2.5 px-6">
+              <h2 className="text-sm font-semibold text-accent">
+                Recomendados
+              </h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => scroll2("left")}
+                  disabled={!canScrollLeft2}
+                  className="p-1.5 rounded-lg bg-accent/30 border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/40 transition-colors"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="h-4 w-4 text-accent" />
+                </button>
+                <button
+                  onClick={() => scroll2("right")}
+                  disabled={!canScrollRight2}
+                  className="p-1.5 rounded-lg bg-accent/30 border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/40 transition-colors"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="h-4 w-4 text-accent" />
+                </button>
+              </div>
             </div>
-          </div>
-          <div
-            ref={scrollContainerRef2}
-            className="flex gap-3 overflow-x-auto pb-2 px-6 scrollbar-hide scroll-smooth"
-          >
-            {productosDestacados.map((producto) => (
-              <div key={producto.id} className="flex-shrink-0 w-36">
-                <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
-                  <Image
-                    src={producto.foto}
-                    alt={producto.nombre}
-                    fill
-                    className="object-cover"
-                  />
-                  {/* Badge Popular/Recomendado */}
-                  {producto.label && (
-                    <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 rounded-full py-1 flex items-center justify-center">
-                      <span className="text-[10px] font-semibold text-primary">
-                        {producto.label}
-                      </span>
-                    </div>
-                  )}
-                  
-                
-                </div>
-                
-                <h3 className="font-medium text-xs text-accent mb-0.5 line-clamp-2">
-                  {producto.nombre}
-                </h3>
+            <div
+              ref={scrollContainerRef2}
+              className="flex gap-3 overflow-x-auto pb-2 px-6 scrollbar-hide scroll-smooth"
+            >
+              {productosDestacados.map((producto) => (
+                <div key={producto.id} className="flex-shrink-0 w-36">
+                  <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
+                    <Image
+                      src={producto.foto}
+                      alt={producto.nombre}
+                      fill
+                      className="object-cover"
+                    />
+                    {/* Badge Popular/Recomendado */}
+                    {producto.label && (
+                      <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 rounded-full py-1 flex items-center justify-center">
+                        <span className="text-[10px] font-semibold text-primary">
+                          {producto.label}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Mostrar precio especial si existe */}
-                {producto.precioespecial &&
-                parseFloat(producto.precioespecial) > 0 &&
-                parseFloat(producto.precioespecial) < parseFloat(producto.precio) ? (
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-[10px] text-accent/60 line-through">
+                  <h3 className="font-medium text-xs text-accent mb-0.5 line-clamp-2">
+                    {producto.nombre}
+                  </h3>
+
+                  {/* Mostrar precio especial si existe */}
+                  {producto.precioespecial &&
+                  parseFloat(producto.precioespecial) > 0 &&
+                  parseFloat(producto.precioespecial) <
+                    parseFloat(producto.precio) ? (
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-[10px] text-accent/60 line-through">
+                        ${parseFloat(producto.precio).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-accent font-bold">
+                        ${parseFloat(producto.precioespecial).toFixed(2)}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-accent font-bold">
                       ${parseFloat(producto.precio).toFixed(2)}
                     </p>
-                    <p className="text-xs text-accent font-bold">
-                      ${parseFloat(producto.precioespecial).toFixed(2)}
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-xs text-accent font-bold">
-                    ${parseFloat(producto.precio).toFixed(2)}
-                  </p>
-                )}
-
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       {/* ========================================== */}
 
       {/* Categorías y Subcategorías */}
@@ -422,6 +423,10 @@ export default function HomePage() {
                 c.subcategorias.some((s) => s.id === sub.id)
               );
 
+              const shouldShowSponsor =
+                sub.nombre === "Signature Drinks" ||
+                sub.nombre === "Smoothies Energeticos";
+
               return (
                 <CategoryCard
                   key={`${sub.id}-${categoria?.id || "all"}`}
@@ -432,6 +437,7 @@ export default function HomePage() {
                   itemCount={sub.count}
                   image={sub.foto}
                   variant="glass"
+                  sponsorLogo={shouldShowSponsor ? "/ena-sport.png" : undefined} // ← AGREGAR
                 />
               );
             })}
