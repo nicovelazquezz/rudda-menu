@@ -373,9 +373,9 @@ export default function HomePage() {
               {/* Chip "Todas" */}
               <button
                 onClick={() => setSelectedCategoryId(null)}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
+                className={`px-4 py-1.5 rounded-full text-xs transition-colors shrink-0 ${
                   selectedCategoryId === null
-                    ? "bg-accent text-primary"
+                    ? "bg-accent text-primary font-bold"
                     : "bg-accent/20 text-accent border border-accent/30 hover:bg-accent/30"
                 }`}
               >
@@ -387,9 +387,9 @@ export default function HomePage() {
                 <button
                   key={categoria.id}
                   onClick={() => setSelectedCategoryId(categoria.id)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
+                  className={`px-4 py-1.5 rounded-full text-xs transition-colors shrink-0 ${
                     selectedCategoryId === categoria.id
-                      ? "bg-accent text-primary"
+                      ? "bg-accent text-primary font-bold"
                       : "bg-accent/20 text-accent border border-accent/30 hover:bg-accent/30"
                   }`}
                 >
