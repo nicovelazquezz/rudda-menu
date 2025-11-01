@@ -416,20 +416,16 @@ export default function GestionDashboard() {
                               <div className="flex flex-col gap-1">
                                 {producto.precioespecial &&
                                 parseFloat(producto.precioespecial) > 0 &&
-                                parseFloat(producto.precioespecial) <
-                                  parseFloat(producto.precio) ? (
+                                parseFloat(producto.precioespecial) < parseFloat(producto.precio) ? (
                                   <>
-                                    {/* Precio original tachado */}
+                                    {/* Precio original tachado sin centavos */}
                                     <span className="text-xs text-black/50 line-through">
-                                      ${parseFloat(producto.precio).toFixed(2)}
+                                      ${Math.trunc(parseFloat(producto.precio || "0"))}
                                     </span>
-                                    {/* Precio especial destacado */}
+                                    {/* Precio especial destacado sin centavos */}
                                     <div className="flex items-center gap-2">
                                       <span className="text-sm text-[#658c5f] font-bold">
-                                        $
-                                        {parseFloat(
-                                          producto.precioespecial
-                                        ).toFixed(2)}
+                                        ${Math.trunc(parseFloat(producto.precioespecial || "0"))}
                                       </span>
                                       <span className="bg-[#658c5f] text-[#d9cebe] text-xs px-2 py-0.5 rounded-full font-medium">
                                         OFERTA
@@ -437,9 +433,9 @@ export default function GestionDashboard() {
                                     </div>
                                   </>
                                 ) : (
-                                  /* Precio normal */
+                                  /* Precio normal sin centavos */
                                   <span className="text-sm text-black font-medium">
-                                    ${parseFloat(producto.precio).toFixed(2)}
+                                    ${Math.trunc(parseFloat(producto.precio || "0"))}
                                   </span>
                                 )}
                               </div>

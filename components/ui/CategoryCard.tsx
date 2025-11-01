@@ -59,7 +59,7 @@ export function CategoryCard({
         </h3>
         {sponsorLogo && (
           <div className="flex items-center gap-1 mt-2 ">
-            <div className="bg-white/5 backdrop-blur-sm rounded-md p-1 shadow-sm flex items-center gap-1 pl-2">
+            <div className="bg-white/10 backdrop-blur-sm rounded-md p-1 shadow-sm flex items-center gap-1 pl-2">
               <span className="text-[12px] font-semibold text-[#2e4b2a]/60">
                 Powered by
               </span>
