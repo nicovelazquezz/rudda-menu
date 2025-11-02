@@ -233,9 +233,9 @@ export default function HomePage() {
             {destacados.map((item) => (
               <div key={item.id} className="flex-shrink-0 w-36">
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
-            {item.imagen ? (
+            {item.foto ? (
 <Image
-  src={item.imagen}
+  src={item.foto}
   alt={item.nombre}
   fill
   className="object-cover"

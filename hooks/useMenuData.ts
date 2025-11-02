@@ -25,7 +25,7 @@ export interface Destacado {
   precio: string;
   tags?: string;
   precioespecial?: string;
-  imagen?: string;
+  foto?: string;
   promocional?: string;
   label?: string; // "Menú del Día", "Promo", "Recomendado", etc.
 }
