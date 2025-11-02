@@ -9,7 +9,7 @@ const Footer = () => {
         
         {/* Link altum.ar */}
         <a
-          href="mailto:sumate@altum.ar"
+          href="https://altum.ar"
           className="text-sm hover:opacity-80 transition-opacity"
         >
           <span className="font-semibold" style={{ color: '#E86A63' }}>altum</span>

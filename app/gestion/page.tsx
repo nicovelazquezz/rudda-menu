@@ -123,9 +123,21 @@ export default function GestionDashboard() {
     fetchCategorias();
   }, []);
 
-  const filteredProductos = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProductos = productos.filter((p) => {
+    if (searchQuery === "ACTIVO") return p.isActive === "1";
+    if (searchQuery === "INACTIVO") return p.isActive === "0";
+    const query = searchQuery.toLowerCase();
+
+    // Buscar en nombre del producto
+    const matchNombre = p.nombre.toLowerCase().includes(query);
+
+    // Buscar en subcategorías
+    const matchSubcategoria = p.subcategorias.some((sub) =>
+      sub.nombre.toLowerCase().includes(query)
+    );
+
+    return matchNombre || matchSubcategoria;
+  });
 
   const filteredSubcategorias = (selectedCategory?.subcategorias ?? []).filter(
     (s) => s.nombre.toLowerCase().includes(searchQuery.toLowerCase())
@@ -192,6 +204,23 @@ export default function GestionDashboard() {
     } catch (error) {
       console.error("Error deleting product:", error);
       alert("Error al eliminar el producto");
+    }
+  };
+
+  const handleToggleActive = async (itemId: number, currentStatus: string) => {
+    const newStatus = currentStatus === "1" ? 0 : 1;
+
+    try {
+      await axios.post(`${API_URL}/activar-desactivar_producto.php`, {
+        id: itemId,
+        status: newStatus,
+      });
+
+      fetchProductos(); // Recargar productos
+      alert(newStatus === 1 ? "Producto activado" : "Producto desactivado");
+    } catch (error) {
+      console.error("Error al actualizar el estado del producto:", error);
+      alert("Error al cambiar el estado del producto");
     }
   };
 
@@ -340,13 +369,99 @@ export default function GestionDashboard() {
           {/* Productos Tab */}
           {activeTab === "productos" && !loading && (
             <div className="space-y-4">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Añadir Producto
-              </button>
+              {/* Botón Añadir Producto - Rediseñado */}
+              {/* Contenedor Flex - Filtros a la izquierda, Botón a la derecha */}
+              <div className="flex items-center justify-between w-full gap-4 mb-6">
+                {/* Filtros a la izquierda */}
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-medium text-black/60 mr-2">
+                    Filtrar:
+                  </p>
+
+                  {/* Todos */}
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                      searchQuery === "" ||
+                      (searchQuery !== "ACTIVO" && searchQuery !== "INACTIVO")
+                        ? "bg-[#658c5f] text-[#d9cebe] shadow-lg shadow-[#658c5f]/30"
+                        : "bg-black/5 text-black/70 hover:bg-black/10 border border-[#c4b8a8]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      <span>Todos</span>
+                      {(searchQuery === "" ||
+                        (searchQuery !== "ACTIVO" &&
+                          searchQuery !== "INACTIVO")) && (
+                        <span className="ml-1 rounded-full bg-[#d9cebe]/20 px-2 py-0.5 text-xs font-bold">
+                          {productos.length}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Activos */}
+                  <button
+                    onClick={() => setSearchQuery("ACTIVO")}
+                    className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                      searchQuery === "ACTIVO"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/30"
+                        : "bg-black/5 text-black/70 hover:bg-green-50 border border-[#c4b8a8]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          searchQuery === "ACTIVO" ? "bg-white" : "bg-green-500"
+                        }`}
+                      />
+                      <span>Activos</span>
+                      {searchQuery === "ACTIVO" && (
+                        <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                          {productos.filter((p) => p.isActive === "1").length}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Inactivos */}
+                  <button
+                    onClick={() => setSearchQuery("INACTIVO")}
+                    className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                      searchQuery === "INACTIVO"
+                        ? "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30"
+                        : "bg-black/5 text-black/70 hover:bg-red-50 border border-[#c4b8a8]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          searchQuery === "INACTIVO" ? "bg-white" : "bg-red-500"
+                        }`}
+                      />
+                      <span>Inactivos</span>
+                      {searchQuery === "INACTIVO" && (
+                        <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                          {productos.filter((p) => p.isActive === "0").length}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </div>
+
+                {/* Botón Añadir Producto a la derecha - ocupa el resto del espacio */}
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className=" cursor-pointer rounded-2xl bg-[#658c5f] px-4 py-2 transition-shadow hover:shadow-xl"
+                >
+                  <div className="flex items-center justify-center gap-2.5">
+                    <div className="rounded-full bg-[#d9cebe]/20 p-1.5">
+                      <Plus className="w-5 h-5 text-[#d9cebe]" />
+                    </div>
+                  </div>
+                </button>
+              </div>
 
               {filteredProductos.length === 0 ? (
                 <div className="text-center py-8">
@@ -374,6 +489,9 @@ export default function GestionDashboard() {
                             SUBCATEGORÍAS
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            TAGS
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
                             ACCIONES
                           </th>
                         </tr>
@@ -382,7 +500,11 @@ export default function GestionDashboard() {
                         {filteredProductos.map((producto) => (
                           <tr
                             key={producto.id}
-                            className="hover:bg-[#c4b8a8] transition-colors"
+                            className={`hover:bg-[#c4b8a8] transition-colors ${
+                              producto.isActive === "0"
+                                ? "bg-red-100 opacity-60"
+                                : ""
+                            }`}
                           >
                             {/* Columna de Producto con imagen */}
                             <td className="px-6 py-4">
@@ -406,6 +528,11 @@ export default function GestionDashboard() {
                                 <span className="text-sm text-black font-medium">
                                   {producto.nombre}
                                 </span>
+                                {producto.isActive === "0" && (
+                                  <span className="ml-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                    INACTIVO
+                                  </span>
+                                )}
                               </div>
                             </td>
 
@@ -416,16 +543,25 @@ export default function GestionDashboard() {
                               <div className="flex flex-col gap-1">
                                 {producto.precioespecial &&
                                 parseFloat(producto.precioespecial) > 0 &&
-                                parseFloat(producto.precioespecial) < parseFloat(producto.precio) ? (
+                                parseFloat(producto.precioespecial) <
+                                  parseFloat(producto.precio) ? (
                                   <>
                                     {/* Precio original tachado sin centavos */}
                                     <span className="text-xs text-black/50 line-through">
-                                      ${Math.trunc(parseFloat(producto.precio || "0"))}
+                                      $
+                                      {Math.trunc(
+                                        parseFloat(producto.precio || "0")
+                                      )}
                                     </span>
                                     {/* Precio especial destacado sin centavos */}
                                     <div className="flex items-center gap-2">
                                       <span className="text-sm text-[#658c5f] font-bold">
-                                        ${Math.trunc(parseFloat(producto.precioespecial || "0"))}
+                                        $
+                                        {Math.trunc(
+                                          parseFloat(
+                                            producto.precioespecial || "0"
+                                          )
+                                        )}
                                       </span>
                                       <span className="bg-[#658c5f] text-[#d9cebe] text-xs px-2 py-0.5 rounded-full font-medium">
                                         OFERTA
@@ -435,7 +571,10 @@ export default function GestionDashboard() {
                                 ) : (
                                   /* Precio normal sin centavos */
                                   <span className="text-sm text-black font-medium">
-                                    ${Math.trunc(parseFloat(producto.precio || "0"))}
+                                    $
+                                    {Math.trunc(
+                                      parseFloat(producto.precio || "0")
+                                    )}
                                   </span>
                                 )}
                               </div>
@@ -451,20 +590,56 @@ export default function GestionDashboard() {
                                 .join(", ")}
                             </td>
                             <td className="px-6 py-4">
+                              {producto.tags && producto.tags.trim() !== "" ? (
+                                <span className="inline-block bg-gradient-to-r from-[#658c5f] to-[#5a7a54] text-[#d9cebe] text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm">
+                                  {producto.tags}
+                                </span>
+                              ) : null}
+                            </td>
+                            <td className="px-6 py-4">
                               <div className="flex gap-2">
+                                {/* Botón Editar */}
                                 <button
                                   onClick={() => handleEditProduct(producto)}
-                                  className="bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                                  className="cursor-pointer rounded-xl bg-[#658c5f] hover:bg-[#5a7a54] text-[#d9cebe] px-4 py-2 text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#658c5f]/30 flex items-center gap-2"
                                 >
                                   <Edit className="w-4 h-4" />
                                   Editar
                                 </button>
+
+                                {/* Botón Eliminar */}
                                 <button
                                   onClick={() => handleDeleteProduct(producto)}
-                                  className="bg-red-900 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                                  className="cursor-pointer rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-800 hover:to-red-700 text-white px-4 py-2 text-sm font-medium transition-all hover:shadow-lg hover:shadow-red-600/30 flex items-center gap-2"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                   Eliminar
+                                </button>
+
+                                {/* Botón Activar/Desactivar */}
+                                <button
+                                  onClick={() =>
+                                    handleToggleActive(
+                                      producto.id,
+                                      producto.isActive
+                                    )
+                                  }
+                                  className={`cursor-pointer rounded-xl px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 ${
+                                    producto.isActive === "1"
+                                      ? "bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white hover:shadow-lg hover:shadow-yellow-500/30"
+                                      : "bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white hover:shadow-lg hover:shadow-green-500/30"
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${
+                                      producto.isActive === "1"
+                                        ? "bg-white"
+                                        : "bg-white"
+                                    }`}
+                                  />
+                                  {producto.isActive === "1"
+                                    ? "Desactivar"
+                                    : "Activar"}
                                 </button>
                               </div>
                             </td>

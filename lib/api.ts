@@ -19,7 +19,7 @@ export interface Vinculacion {
 }
 
 export interface Producto {
-  id: string;
+  id: number;
   nombre: string;
   descripcion: string;
   promocional: string;
@@ -38,6 +38,7 @@ export interface Producto {
   vegetariano: string;
   vegano: string;
   foto: string;
+  tags?: string; // <-- NUEVO CAMPO
 }
 
 export interface CategoriaConSubcategorias {

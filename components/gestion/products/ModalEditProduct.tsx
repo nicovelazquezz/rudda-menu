@@ -41,6 +41,7 @@ const ModalProductEdit = ({
   const [imagen, setImagen] = useState(product?.imagen || ""); // <-- NUEVO
   const [imageError, setImageError] = useState(""); // <-- NUEVO
   const [imageChanged, setImageChanged] = useState(false); // <-- NUEVO: Para saber si cambió la imagen
+  const [tags, setTags] = useState(product?.tags || "");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -191,6 +192,7 @@ const ModalProductEdit = ({
         precio: price,
         precioespecial: precioEspecial,
         promocional: promocional,
+        tags: tags,
         vinculaciones: categorySubcategoryPairs.map((pair) => ({
           categoria_id: pair.categoria_id,
           subcategoria_id: pair.subcategoria_id,
@@ -328,6 +330,28 @@ const ModalProductEdit = ({
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
         </div>
+
+        {/* Tags */}
+<div>
+  <label className="block text-sm font-medium text-black mb-2">
+    Tag Especial (Opcional)
+  </label>
+  <select
+    value={tags}
+    onChange={(e) => setTags(e.target.value)}
+    className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f]"
+  >
+    <option value="">Sin tag</option>
+    <option value="Happy Hour">Happy Hour</option>
+    <option value="2x1">2x1</option>
+    <option value="Destacado">Destacado</option>
+    <option value="Menú del Día">Menú del Día</option>
+    <option value="Promoción">Promoción</option>
+  </select>
+  <p className="text-xs text-black/60 mt-1">
+    Selecciona un tag especial para destacar este producto
+  </p>
+</div>
 
         {/* Precio */}
         <div>

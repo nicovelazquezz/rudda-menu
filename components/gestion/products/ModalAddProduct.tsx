@@ -31,6 +31,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
   const [promocional, setPromocional] = useState("");
   const [imagen, setImagen] = useState(""); // <-- NUEVO
   const [imageError, setImageError] = useState(""); // <-- NUEVO
+  const [tags, setTags] = useState("");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -167,6 +168,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
         precio: price,
         precioespecial: precioEspecial,
         promocional: promocional,
+        tags: tags,
         imagen: imagen, // <-- NUEVO: Enviar imagen (puede estar vacía)
         vinculaciones: categorySubcategoryPairs,
         sin_gluten: isGlutenFree ? 1 : 0,
@@ -185,6 +187,7 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
       setPrice("");
       setPrecioEspecial("");
       setPromocional("");
+      setTags("");
       setImagen(""); // <-- NUEVO
       setImageError(""); // <-- NUEVO
       setIsGlutenFree(false);
@@ -313,6 +316,28 @@ const ModalProductAdd = ({ onClose, onSuccess }: ModalProductAddProps) => {
             className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
           />
         </div>
+
+        {/* Tags */}
+<div>
+  <label className="block text-sm font-medium text-black mb-2">
+    Tag Especial (Opcional)
+  </label>
+  <select
+    value={tags}
+    onChange={(e) => setTags(e.target.value)}
+    className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black focus:outline-none focus:border-[#658c5f]"
+  >
+    <option value="">Sin tag</option>
+    <option value="Happy Hour">Happy Hour</option>
+    <option value="2x1">2x1</option>
+    <option value="Destacado">Destacado</option>
+    <option value="Menú del Día">Menú del Día</option>
+    <option value="Promoción">Promoción</option>
+  </select>
+  <p className="text-xs text-black/60 mt-1">
+    Selecciona un tag especial para destacar este producto
+  </p>
+</div>
 
         {/* Precio */}
         <div>
