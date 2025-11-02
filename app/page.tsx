@@ -242,10 +242,24 @@ export default function HomePage() {
                   ) : (
                     <div className="w-full h-full bg-accent/20" />
                   )}
-                  {item.label && (
-                    <div className="absolute top-2 right-2 bg-accent/95 backdrop-blur-sm px-2 rounded-full py-1 flex items-center justify-center">
-                      <span className="text-[10px] font-semibold text-primary">
-                        {item.label}
+                  {item.tags && item.tags.trim() !== "" && (
+                    <div
+                      className={`absolute top-2 right-2 backdrop-blur-sm rounded-md px-2.5 py-1 shadow-sm flex items-center ${
+                        item.tags === "Happy Hour"
+                          ? "bg-amber-500/10"
+                          : item.tags === "2x1"
+                          ? "bg-emerald-500/10"
+                          : item.tags === "Destacado"
+                          ? "bg-rose-500/10"
+                          : item.tags === "Menú del Día"
+                          ? "bg-sky-500/10"
+                          : item.tags === "Promoción"
+                          ? "bg-orange-500/10"
+                          : "bg-white/10"
+                      }`}
+                    >
+                      <span className="text-[10px] font-semibold text-[#2e4b2a]/60 uppercase tracking-wide">
+                        {item.tags}
                       </span>
                     </div>
                   )}
@@ -281,10 +295,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-
-        
-
 
       {/* Categorías y Subcategorías */}
       <div className="px-6">

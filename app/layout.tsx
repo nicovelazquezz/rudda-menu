@@ -6,7 +6,10 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Rudda Coffee Club - Menú Digital",
   description: "Carta digital de Rudda Coffee Club - Specialty coffee, desayunos y brunch",
-    generator: 'v0.app'
+  generator: 'v0.app',
+  icons: {
+    icon: '/logo-rudda.png',
+  },
 }
 
 export default function RootLayout({

@@ -34,6 +34,12 @@ function MenuItemRow({
   const [isExpanded, setIsExpanded] = useState(false);
   const hasLongDescription = description && description.length > 120;
 
+    // Normaliza: convierte "\n" literales a saltos reales y unifica CRLF/CR/LF
+  const normalizedDescription =
+    (description ?? "")
+      .replaceAll("\\n", "\n")
+      .replace(/\r\n|\r|\n/g, "\n");
+
   return (
     <div className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
       <div className="flex gap-4 p-3 sm:p-4">
@@ -84,19 +90,16 @@ function MenuItemRow({
               )}
             </div>
           </div>
-
-          {/* Descripción con expand/collapse */}
-          {description && (
+ {normalizedDescription && (
             <div className="mt-1">
               <p
-                className={`text-xs leading-relaxed text-white/80 ${
+                className={`text-xs leading-relaxed text-white/80 whitespace-pre-line ${
                   !isExpanded && hasLongDescription ? "line-clamp-3" : ""
                 }`}
               >
-                {description}
+                {normalizedDescription}
               </p>
 
-              {/* Botón "Ver más/menos" solo si la descripción es larga */}
               {hasLongDescription && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
@@ -115,7 +118,6 @@ function MenuItemRow({
               )}
             </div>
           )}
-
           {promocional && (
             <p className="mt-1 text-xs text-accent/90 italic">{promocional}</p>
           )}
@@ -272,13 +274,15 @@ export default function CategoryPage({
       </div>
 
       {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
-      {subcategoria?.descripcion && (
-        <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
-          <p className="text-sm sm:text-base leading-relaxed text-white/80 text-start">
-            {subcategoria.descripcion}
-          </p>
-        </div>
-      )}
+{subcategoria?.descripcion && (
+  <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
+    <div className="border-l-4 border-accent/40 pl-4 py-2">
+      <p className="text-sm sm:text-base leading-relaxed text-white/80 whitespace-pre-line">
+        {subcategoria.descripcion}
+      </p>
+    </div>
+  </div>
+)}
       {/* ==========================================
           ← NUEVA SECCIÓN: PRODUCTOS DESTACADOS
           ========================================== */}

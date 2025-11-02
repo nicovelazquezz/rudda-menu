@@ -23,6 +23,7 @@ export interface Producto {
   nombre: string;
   descripcion: string;
   promocional: string;
+  destacado: string;
   precio: string;
   precioespecial: string;
   precio33cl: string;

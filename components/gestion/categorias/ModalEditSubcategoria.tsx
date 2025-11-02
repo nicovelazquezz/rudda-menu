@@ -12,6 +12,7 @@ interface ModalEditSubcategoriaProps {
   subcategoria: {
     id: number;
     nombre: string;
+    descripcion?: string;
   };
 }
 
@@ -21,6 +22,7 @@ const ModalEditSubcategoria = ({
   subcategoria,
 }: ModalEditSubcategoriaProps) => {
   const [nombre, setNombre] = useState(subcategoria.nombre);
+  const [descripcion, setDescripcion] = useState(subcategoria.descripcion || "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEditSubcategoria = async () => {
@@ -35,9 +37,10 @@ const ModalEditSubcategoria = ({
       await axios.post(`${API_URL}/edit_subcategoria.php`, {
         id: subcategoria.id,
         nombre: nombre,
+        descripcion: descripcion,
       });
 
-  await onSuccess();
+      await onSuccess();
     } catch (error) {
       console.error("Error editing subcategoria:", error);
       alert("Error al editar la subcategoría");
@@ -64,7 +67,9 @@ const ModalEditSubcategoria = ({
       {/* Body */}
       <div className="p-6 space-y-4">
         <div>
-
+          <label className="block text-sm font-medium text-black mb-2">
+            Nombre de la Subcategoría *
+          </label>
           <input
             type="text"
             value={nombre}
@@ -74,6 +79,18 @@ const ModalEditSubcategoria = ({
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            Descripción (Opcional)
+          </label>
+          <textarea
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            placeholder="Descripción de la subcategoría..."
+            rows={3}
+            className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
+          />
+        </div>
       </div>
 
       {/* Footer */}

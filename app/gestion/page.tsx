@@ -224,6 +224,21 @@ export default function GestionDashboard() {
     }
   };
 
+  const handleTogglePromocion = async (itemId: number, isPromoted: boolean) => {
+    try {
+      await axios.post(`${API_URL}/set_promocion.php`, {
+        id: itemId,
+        promocionar: !isPromoted, // Invertir el estado actual
+      });
+
+      fetchProductos(); // Recargar productos
+      alert(!isPromoted ? "Producto promocionado" : "Promoción eliminada");
+    } catch (error) {
+      console.error("Error al cambiar la promoción del producto:", error);
+      alert("Error al cambiar la promoción del producto");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#d9cebe]">
       {/* Sidebar */}
@@ -533,6 +548,11 @@ export default function GestionDashboard() {
                                     INACTIVO
                                   </span>
                                 )}
+                                {producto.destacado === "1" && (
+                                  <span className="ml-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                    ⭐ 
+                                  </span>
+                                )}
                               </div>
                             </td>
 
@@ -640,6 +660,25 @@ export default function GestionDashboard() {
                                   {producto.isActive === "1"
                                     ? "Desactivar"
                                     : "Activar"}
+                                </button>
+                                {/* Botón Promocionar/Despromocionar */}
+                                <button
+                                  onClick={() =>
+                                    handleTogglePromocion(
+                                      producto.id,
+                                      producto.destacado === "1"
+                                    )
+                                  }
+                                  className={`cursor-pointer rounded-xl px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 ${
+                                    producto.destacado === "1"
+                                      ? "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white hover:shadow-lg hover:shadow-purple-500/30"
+                                      : "bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white hover:shadow-lg hover:shadow-blue-500/30"
+                                  }`}
+                                >
+
+                                  {producto.destacado === "1"
+                                    ? "Quitar ⭐"
+                                    : "⭐ "}
                                 </button>
                               </div>
                             </td>

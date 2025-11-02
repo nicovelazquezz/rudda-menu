@@ -20,6 +20,7 @@ const ModalAddSubcategoria = ({
   categoriaNombre,
 }: ModalAddSubcategoriaProps) => {
   const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddSubcategoria = async () => {
@@ -32,21 +33,22 @@ const ModalAddSubcategoria = ({
 
     const payload = {
       nombre: nombre,
+      descripcion: descripcion,
       categoriaId: categoriaId,
     };
 
-    console.log("POST to", `${API_URL}/add-subcategoria`, "payload:", payload);
+    console.log("POST to", `${API_URL}/add-subcategoria.php`, "payload:", payload);
 
     try {
       const response = await axios.post(`${API_URL}/add-subcategoria.php`, payload);
       console.log("POST response:", response);
 
-        // ✅ Llamar onSuccess y esperar a que termine
-  await onSuccess();
-  
-  // Limpiar formulario
-  setNombre("");
+      // ✅ Llamar onSuccess y esperar a que termine
+      await onSuccess();
 
+      // Limpiar formulario
+      setNombre("");
+      setDescripcion("");
     } catch (error) {
       console.error("Error adding subcategoria:", error);
       alert("Error al añadir la subcategoría");
@@ -73,7 +75,9 @@ const ModalAddSubcategoria = ({
       {/* Body */}
       <div className="p-6 space-y-4">
         <div>
-
+          <label className="block text-sm font-medium text-black mb-2">
+            Nombre de la Subcategoría *
+          </label>
           <input
             type="text"
             value={nombre}
@@ -83,7 +87,18 @@ const ModalAddSubcategoria = ({
           />
         </div>
 
-
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            Descripción (Opcional)
+          </label>
+          <textarea
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            placeholder="Descripción de la subcategoría..."
+            rows={3}
+            className="w-full px-4 py-2 bg-[#d9cebe] border-2 border-[#c4b8a8] rounded-lg text-black placeholder:text-black/50 focus:outline-none focus:border-[#658c5f]"
+          />
+        </div>
       </div>
 
       {/* Footer */}
