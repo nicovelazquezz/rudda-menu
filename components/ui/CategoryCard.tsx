@@ -47,6 +47,7 @@ export function CategoryCard({
           src={image || "/placeholder-producto.webp"}
           alt={name}
           fill
+          quality={100}
           sizes="64px"
           className="object-cover transition-transform duration-300 group-hover:scale-[1.05]"
         />
