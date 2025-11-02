@@ -8,6 +8,7 @@ import { useMenuData } from "@/hooks/useMenuData";
 import ModalPromos from "@/components/ModalPromos";
 import BackToTop from "@/components/BackToTop";
 
+
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
@@ -253,27 +254,31 @@ export default function HomePage() {
 
 />
             )}
-                  {item.tags && item.tags.trim() !== "" && (
-                    <div
-                      className={`absolute top-2 right-2 backdrop-blur-sm rounded-md px-2.5 py-1 shadow-sm flex items-center ${
-                        item.tags === "Happy Hour"
-                          ? "bg-amber-500/10"
-                          : item.tags === "2x1"
-                          ? "bg-emerald-500/10"
-                          : item.tags === "Destacado"
-                          ? "bg-rose-500/10"
-                          : item.tags === "Menú del Día"
-                          ? "bg-sky-500/10"
-                          : item.tags === "Promoción"
-                          ? "bg-orange-500/10"
-                          : "bg-white/10"
-                      }`}
-                    >
-                      <span className="text-[10px] font-semibold text-[#2e4b2a]/60 uppercase tracking-wide">
-                        {item.tags}
-                      </span>
-                    </div>
-                  )}
+
+
+{item.tags && item.tags.trim() !== "" && (
+  <div
+    className={` 
+      absolute top-2 right-2
+      rounded-md px-2.5 py-1.5
+      flex items-center
+      backdrop-blur-md shadow-sm ring-1 ring-white/15
+      bg-black/30
+      ${item.tags === "Happy Hour" ? "bg-clip-padding [background:linear-gradient(to_right,rgba(0,0,0,.30),rgba(0,0,0,.30)),linear-gradient(to_right,rgba(251,191,36,.20),rgba(251,146,60,.15))]"
+        : item.tags === "2x1" ? "[background:linear-gradient(to_right,rgba(0,0,0,.30),rgba(0,0,0,.30)),linear-gradient(to_right,rgba(52,211,153,.20),rgba(16,185,129,.15))]"
+        : item.tags === "Destacado" ? "[background:linear-gradient(to_right,rgba(0,0,0,.30),rgba(0,0,0,.30)),linear-gradient(to_right,rgba(244,114,182,.20),rgba(251,113,133,.15))]"
+        : item.tags === "Menú del Día" ? "[background:linear-gradient(to_right,rgba(0,0,0,.30),rgba(0,0,0,.30)),linear-gradient(to_right,rgba(56,189,248,.20),rgba(59,130,246,.15))]"
+        : item.tags === "Promoción" ? "[background:linear-gradient(to_right,rgba(0,0,0,.30),rgba(0,0,0,.30)),linear-gradient(to_right,rgba(251,146,60,.20),rgba(234,88,12,.15))]"
+        : "bg-black/30"}
+    `}
+  >
+    <span className="text-[10px] font-semibold uppercase tracking-wide text-white/90 leading-none">
+      {item.tags}
+    </span>
+  </div>
+)}
+
+
                 </div>
                 <h3 className="font-medium text-xs text-accent mb-0.5 line-clamp-2">
                   {item.nombre}
