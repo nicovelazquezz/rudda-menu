@@ -232,16 +232,21 @@ export default function HomePage() {
             {destacados.map((item) => (
               <div key={item.id} className="flex-shrink-0 w-36">
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
-                  {item.imagen ? (
-                    <Image
-                      src={item.imagen}
-                      alt={item.nombre}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-accent/20" />
-                  )}
+            {item.imagen ? (
+              <Image
+                src={item.imagen}
+                alt={item.nombre}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <Image
+                src="/logo-rudda.png"
+                alt="Rudda placeholder"
+                fill
+                className="object-cover bg-accent/20 p-4"
+              />
+            )}
                   {item.tags && item.tags.trim() !== "" && (
                     <div
                       className={`absolute top-2 right-2 backdrop-blur-sm rounded-md px-2.5 py-1 shadow-sm flex items-center ${

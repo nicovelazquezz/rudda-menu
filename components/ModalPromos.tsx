@@ -66,7 +66,7 @@ export default function ModalPromos() {
       <div className="relative w-full max-w-lg bg-[#d9cebe] rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b-2 border-[#c4b8a8]">
-          <h2 className="text-xl font-display font-bold text-black">
+          <h2 className="text-xl font-display font-bold text-[#2e4b2a]">
             ¡Bienvenido a Rudda Coffee Club!
           </h2>
           <button
@@ -136,11 +136,11 @@ export default function ModalPromos() {
         </div>
 
         {/* Footer opcional */}
-        <div className="p-4 text-center border-t-2 border-[#c4b8a8]">
+        {/* <div className="p-4 text-center border-t-2 border-[#c4b8a8]">
           <p className="text-sm text-black/70">
             Válidas hasta agotar stock • Consultá condiciones
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
