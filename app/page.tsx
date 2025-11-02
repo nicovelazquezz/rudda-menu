@@ -173,6 +173,7 @@ export default function HomePage() {
           alt="Rudda Coffee Club"
           width={250}
           height={100}
+          quality={100}          
           className="mx-auto"
         />
       </header>
@@ -233,19 +234,24 @@ export default function HomePage() {
               <div key={item.id} className="flex-shrink-0 w-36">
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
             {item.imagen ? (
-              <Image
-                src={item.imagen}
-                alt={item.nombre}
-                fill
-                className="object-cover"
-              />
+<Image
+  src={item.imagen}
+  alt={item.nombre}
+  fill
+  className="object-cover"
+  sizes="144px"
+  quality={100}
+/>
             ) : (
               <Image
-                src="/logo-rudda.png"
-                alt="Rudda placeholder"
-                fill
-                className="object-cover bg-accent/20 p-4"
-              />
+  src="/placeholder-subcategori.png"
+  alt="Rudda placeholder"
+  fill
+  className="object-contain bg-accent/20 p-4"
+  sizes="144px"
+  quality={100}
+
+/>
             )}
                   {item.tags && item.tags.trim() !== "" && (
                     <div
