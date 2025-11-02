@@ -34,11 +34,10 @@ function MenuItemRow({
   const [isExpanded, setIsExpanded] = useState(false);
   const hasLongDescription = description && description.length > 120;
 
-    // Normaliza: convierte "\n" literales a saltos reales y unifica CRLF/CR/LF
-  const normalizedDescription =
-    (description ?? "")
-      .replaceAll("\\n", "\n")
-      .replace(/\r\n|\r|\n/g, "\n");
+  // Normaliza: convierte "\n" literales a saltos reales y unifica CRLF/CR/LF
+  const normalizedDescription = (description ?? "")
+    .replaceAll("\\n", "\n")
+    .replace(/\r\n|\r|\n/g, "\n");
 
   return (
     <div className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
@@ -90,7 +89,7 @@ function MenuItemRow({
               )}
             </div>
           </div>
- {normalizedDescription && (
+          {normalizedDescription && (
             <div className="mt-1">
               <p
                 className={`text-xs leading-relaxed text-white/80 whitespace-pre-line ${
@@ -159,6 +158,10 @@ export default function CategoryPage({
   const shouldShowSponsor =
     subcategoria?.nombre === "Signature Drinks" ||
     subcategoria?.nombre === "Smoothies Energeticos";
+
+  const subcategoriaDescripcion = (subcategoria?.descripcion ?? "")
+    .replace(/\\n/g, "\n") // convierte "\n" literales en saltos reales
+    .replace(/\r\n|\r|\n/g, "\n"); // unifica finales de línea
 
   // ← NUEVO: Función para mezclar y seleccionar productos aleatorios
   useEffect(() => {
@@ -274,15 +277,15 @@ export default function CategoryPage({
       </div>
 
       {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
-{subcategoria?.descripcion && (
-  <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
-    <div className="border-l-4 border-accent/40 pl-4 py-2">
-      <p className="text-sm sm:text-base leading-relaxed text-white/80 whitespace-pre-line">
-        {subcategoria.descripcion}
-      </p>
-    </div>
-  </div>
-)}
+
+      {subcategoriaDescripcion && (
+        <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
+          <p className="text-sm sm:text-base leading-relaxed text-white/80 text-start whitespace-pre-line">
+            {subcategoriaDescripcion}
+          </p>
+        </div>
+      )}
+
       {/* ==========================================
           ← NUEVA SECCIÓN: PRODUCTOS DESTACADOS
           ========================================== */}

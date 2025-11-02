@@ -27,6 +27,7 @@ import axios from "axios";
 import { Producto, CategoriaConSubcategorias } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "next/navigation";
+import ToggleSwitch from "@/components/gestion/products/ToggleSwitch";
 
 const menuItems = [
   { icon: Package, label: "Productos", value: "productos" },
@@ -507,6 +508,9 @@ export default function GestionDashboard() {
                             TAGS
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-bold text-black">
+                            PROMOCIONAR
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold text-black">
                             ACCIONES
                           </th>
                         </tr>
@@ -549,8 +553,8 @@ export default function GestionDashboard() {
                                   </span>
                                 )}
                                 {producto.destacado === "1" && (
-                                  <span className="ml-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                                    ⭐ 
+                                  <span className="ml-2 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                    ⭐
                                   </span>
                                 )}
                               </div>
@@ -611,11 +615,38 @@ export default function GestionDashboard() {
                             </td>
                             <td className="px-6 py-4">
                               {producto.tags && producto.tags.trim() !== "" ? (
-                                <span className="inline-block bg-gradient-to-r from-[#658c5f] to-[#5a7a54] text-[#d9cebe] text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm">
+                                <div
+                                className={`backdrop-blur-sm rounded-md px-2.5 py-1 shadow-sm flex items-center justify-center overflow-hidden ${
+                                producto.tags === "Happy Hour"
+                                  ? "bg-amber-500/10"
+                                  : producto.tags === "2x1"
+                                  ? "bg-emerald-500/10"
+                                  : producto.tags === "Destacado"
+                                  ? "bg-rose-500/10"
+                                  : producto.tags === "Menú del Día"
+                                  ? "bg-sky-500/10"
+                                  : producto.tags === "Promoción"
+                                  ? "bg-orange-500/10"
+                                  : "bg-white/10"
+                                }`}
+                                >
+                                <span className="w-full text-[10px] text-center font-semibold text-[#2e4b2a]/60 uppercase tracking-wide whitespace-nowrap truncate">
                                   {producto.tags}
                                 </span>
+                                </div>
                               ) : null}
                             </td>
+                            <td className="px-6 py-4 flex items-center justify-center">
+                              <ToggleSwitch
+                                checked={producto.destacado === "1"}
+                                onChange={() =>
+                                  handleTogglePromocion(producto.id, producto.destacado === "1")
+                                }
+                                labelOn="Promocionado"
+                                labelOff="Promocionar"
+                              />
+                            </td>
+
                             <td className="px-6 py-4">
                               <div className="flex gap-2">
                                 {/* Botón Editar */}
@@ -661,25 +692,8 @@ export default function GestionDashboard() {
                                     ? "Desactivar"
                                     : "Activar"}
                                 </button>
-                                {/* Botón Promocionar/Despromocionar */}
-                                <button
-                                  onClick={() =>
-                                    handleTogglePromocion(
-                                      producto.id,
-                                      producto.destacado === "1"
-                                    )
-                                  }
-                                  className={`cursor-pointer rounded-xl px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 ${
-                                    producto.destacado === "1"
-                                      ? "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white hover:shadow-lg hover:shadow-purple-500/30"
-                                      : "bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white hover:shadow-lg hover:shadow-blue-500/30"
-                                  }`}
-                                >
 
-                                  {producto.destacado === "1"
-                                    ? "Quitar ⭐"
-                                    : "⭐ "}
-                                </button>
+                                
                               </div>
                             </td>
                           </tr>

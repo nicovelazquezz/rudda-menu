@@ -23,6 +23,7 @@ export interface Destacado {
   nombre: string;
   descripcion: string;
   precio: string;
+  tags?: string;
   precioespecial?: string;
   imagen?: string;
   promocional?: string;
