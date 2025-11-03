@@ -206,7 +206,7 @@ export default function HomePage() {
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2.5 px-6">
             <h2 className="text-sm font-semibold text-accent">
-              Recomendados & Promociones
+              Recomendados & Promocioness
             </h2>
             <div className="flex gap-2">
               <button
