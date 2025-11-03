@@ -371,7 +371,7 @@ export default function GestionDashboard() {
           {/* Loading State */}
           {loading && (
             <div className="text-center py-8">
-              <p className="text-black">Cargando....</p>
+              <p className="text-black">Cargando...</p>
             </div>
           )}
 
