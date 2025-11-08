@@ -39,8 +39,11 @@ export default function ModalPromos() {
           const promosActivas = response.data.filter((p) => p.activo === "1");
           setPromos(promosActivas);
 
-          // Abrir modal solo si hay promociones activas
-          if (promosActivas.length > 0) {
+          // Verificar si el usuario ya cerró el modal en esta sesión
+          const hasClosedModal = localStorage.getItem("welcomeModalClosed");
+
+          // Abrir modal solo si hay promociones activas Y no lo ha cerrado antes
+          if (promosActivas.length > 0 && !hasClosedModal) {
             setIsOpen(true);
           }
         }
@@ -70,7 +73,10 @@ export default function ModalPromos() {
             ¡Bienvenido a Rudda Coffee Club!
           </h2>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              localStorage.setItem("welcomeModalClosed", "true");
+            }}
             className="p-2 hover:bg-[#c4b8a8] rounded-lg transition-colors"
             aria-label="Cerrar modal"
           >
