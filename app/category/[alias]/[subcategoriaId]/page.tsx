@@ -278,7 +278,7 @@ export default function CategoryPage({
 
       {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA (solo si NO es ID 16) */}
 
-      {subcategoriaDescripcion && subcategoriaId !== '16' && (
+      {subcategoriaDescripcion && subcategoriaId !== "16" && (
         <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
           <p className="text-sm sm:text-base leading-relaxed text-white/80 text-start whitespace-pre-line">
             {subcategoriaDescripcion}
@@ -319,7 +319,7 @@ export default function CategoryPage({
 
           <div
             ref={scrollContainerRef}
-            className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
+            className="flex gap-3 overflow-x-auto  scrollbar-hide scroll-smooth"
           >
             {productosDestacados.map((producto) => (
               <div key={producto.id} className="flex-shrink-0 w-36">
@@ -369,15 +369,12 @@ export default function CategoryPage({
       {/* ========================================== */}
 
       {/* ← DESCRIPCIÓN ESPECIAL PARA ID 16 (después de destacados) */}
-      {subcategoriaDescripcion && subcategoriaId === '16' && (
-        <div className="px-6 pb-2  max-w-7xl mx-auto">
+      {subcategoriaDescripcion && subcategoriaId === "16" && (
+        <div className="px-6   max-w-7xl mx-auto">
           <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 shadow-sm">
             <p className="text-[16px]  font-semibold text-white/70 leading-relaxed text-center whitespace-pre-line">
               {subcategoriaDescripcion}
             </p>
-          </div>
-          <div className="mt-6 flex items-center gap-3">
-            <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
           </div>
         </div>
       )}
@@ -402,6 +399,9 @@ export default function CategoryPage({
 
       {/* Items - Mejorado para Desktop */}
       <div className="px-6 py-6 max-w-7xl mx-auto">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="h-0.5 flex-1 bg-linear-to-r from-transparent via-accent/40 to-transparent rounded-full" />
+        </div>
         {productos.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-white/70">No hay productos en esta categoría</p>
