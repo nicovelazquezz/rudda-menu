@@ -276,9 +276,9 @@ export default function CategoryPage({
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent" />
       </div>
 
-      {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA */}
+      {/* ← DESCRIPCIÓN DE LA SUBCATEGORÍA (solo si NO es ID 16) */}
 
-      {subcategoriaDescripcion && (
+      {subcategoriaDescripcion && subcategoriaId !== '16' && (
         <div className="px-6 pt-6 pb-3 max-w-7xl mx-auto">
           <p className="text-sm sm:text-base leading-relaxed text-white/80 text-start whitespace-pre-line">
             {subcategoriaDescripcion}
@@ -367,6 +367,17 @@ export default function CategoryPage({
         </div>
       )}
       {/* ========================================== */}
+
+      {/* ← DESCRIPCIÓN ESPECIAL PARA ID 16 (después de destacados) */}
+      {subcategoriaDescripcion && subcategoriaId === '16' && (
+        <div className="px-6 pb-6 max-w-7xl mx-auto">
+          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 shadow-sm">
+            <p className="text-[16px]  font-semibold text-white/70 leading-relaxed text-center whitespace-pre-line">
+              {subcategoriaDescripcion}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ← NUEVO: Badge Sponsor - Solo para categorías patrocinadas */}
       {shouldShowSponsor && (
