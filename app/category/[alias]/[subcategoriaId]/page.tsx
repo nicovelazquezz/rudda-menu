@@ -370,11 +370,14 @@ export default function CategoryPage({
 
       {/* ← DESCRIPCIÓN ESPECIAL PARA ID 16 (después de destacados) */}
       {subcategoriaDescripcion && subcategoriaId === '16' && (
-        <div className="px-6 pb-6 max-w-7xl mx-auto">
+        <div className="px-6 pb-2  max-w-7xl mx-auto">
           <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 shadow-sm">
             <p className="text-[16px]  font-semibold text-white/70 leading-relaxed text-center whitespace-pre-line">
               {subcategoriaDescripcion}
             </p>
+          </div>
+          <div className="mt-6 flex items-center gap-3">
+            <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
           </div>
         </div>
       )}
