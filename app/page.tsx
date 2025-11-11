@@ -371,9 +371,19 @@ export default function HomePage() {
                 c.subcategorias.some((s) => s.id === sub.id)
               );
 
-              const shouldShowSponsor =
+              const shouldShowEnaSponsor =
                 sub.nombre === "Signature Drinks" ||
                 sub.nombre === "Smoothies Energeticos";
+
+              const shouldShowPastoSponsor = sub.id === 37;
+
+              // Determinar qué logo mostrar
+              let sponsorLogo = undefined;
+              if (shouldShowEnaSponsor) {
+                sponsorLogo = "/ena-sport.png";
+              } else if (shouldShowPastoSponsor) {
+                sponsorLogo = "/pasto.png";
+              }
 
               return (
                 <CategoryCard
@@ -385,7 +395,7 @@ export default function HomePage() {
                   itemCount={sub.count}
                   image={sub.foto}
                   variant="glass"
-                  sponsorLogo={shouldShowSponsor ? "/ena-sport.png" : undefined} // ← AGREGAR
+                  sponsorLogo={sponsorLogo}
                 />
               );
             })}

@@ -64,13 +64,26 @@ export function CategoryCard({
               <span className="text-[12px] font-semibold text-[#2e4b2a]/60">
                 Powered by
               </span>
-              <Image
-                src={sponsorLogo}
-                alt="Sponsor"
-                width={48}
-                height={32}
-                className="object-contain"
-              />
+              {sponsorLogo === "/pasto.png" ? (
+                <div className="relative w-[48px] h-[24px] overflow-hidden">
+                  <Image
+                    src={sponsorLogo}
+                    alt="Sponsor"
+                    width={64}
+                    height={64}
+                    className="object-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  />
+                </div>
+              ) : (
+                <Image
+                  src={sponsorLogo}
+                  alt="Sponsor"
+                  width={48}
+                  height={32}
+                  className="object-contain"
+                  style={{ marginTop: "1.5px", marginBottom: "1.5px" }}
+                />
+              )}
             </div>
           </div>
         )}

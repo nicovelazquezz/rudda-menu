@@ -94,22 +94,11 @@ export default function GestionDashboard() {
     setError(null);
     try {
       const response = await axios.get(
-        `${API_URL}/categorias_y_destacados.php`
+        `${API_URL}/categorias.php`
       );
 
-      // Mapear la nueva estructura al formato esperado
-      const categoriasFormateadas = response.data.categorias.map(
-        (cat: any) => ({
-          categoria: {
-            id: cat.id,
-            nombre: cat.nombre,
-            alias: cat.alias,
-          },
-          subcategorias: cat.subcategorias,
-        })
-      );
-
-      setCategorias(categoriasFormateadas);
+      // La respuesta ya viene en el formato correcto
+      setCategorias(response.data);
     } catch (err) {
       console.error("Error fetching categorías:", err);
       setError("Error al cargar las categorías");
