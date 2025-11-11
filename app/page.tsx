@@ -375,7 +375,7 @@ export default function HomePage() {
                 sub.nombre === "Signature Drinks" ||
                 sub.nombre === "Smoothies Energeticos";
 
-              const shouldShowPastoSponsor = sub.id === 37;
+              const shouldShowPastoSponsor = sub.id === "37";
 
               // Determinar qué logo mostrar
               let sponsorLogo = undefined;

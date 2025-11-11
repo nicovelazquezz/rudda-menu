@@ -154,10 +154,20 @@ export default function CategoryPage({
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [productosDestacados, setProductosDestacados] = useState<any[]>([]);
 
-  // ← NUEVO: Determinar si debe mostrar sponsor
-  const shouldShowSponsor =
-    subcategoria?.nombre === "Signature Drinks" ||
-    subcategoria?.nombre === "Smoothies Energeticos";
+  // ← NUEVO: Determinar qué sponsor mostrar (si alguno)
+  const getSponsorLogo = () => {
+    const nombre = subcategoria?.nombre?.toLowerCase();
+    if (nombre === "signature drinks" || nombre === "smoothies energeticos") {
+      return "/ena-sport.png";
+    }    
+    if (nombre === "comida energética" || subcategoriaId === "37") {
+      return "/pasto.png";
+    }
+    return null;
+  };
+
+  const sponsorLogo = getSponsorLogo();
+  const shouldShowSponsor = sponsorLogo !== null;
 
   const subcategoriaDescripcion = (subcategoria?.descripcion ?? "")
     .replace(/\\n/g, "\n") // convierte "\n" literales en saltos reales
@@ -381,18 +391,30 @@ export default function CategoryPage({
 
       {/* ← NUEVO: Badge Sponsor - Solo para categorías patrocinadas */}
       {shouldShowSponsor && (
-        <div className="px-6  max-w-7xl mx-auto">
+        <div className={`px-6 max-w-7xl mx-auto ${subcategoriaDescripcion ? "mt-2" : ""}`}>
           <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 shadow-sm flex items-center justify-center gap-2">
             <span className="text-[16px] font-bold text-white/70">
               Powered by
             </span>
-            <Image
-              src="/ena-sport.png"
-              alt="ENA Sport"
-              width={56}
-              height={37}
-              className="object-contain"
-            />
+            {sponsorLogo === "/pasto.png" ? (
+              <div className="relative w-[48px] h-[24px] overflow-hidden">
+                <Image
+                  src={sponsorLogo}
+                  alt="Sponsor"
+                  width={64}
+                  height={64}
+                  className="object-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                />
+              </div>
+            ) : (
+              <Image
+                src={sponsorLogo || "/ena-sport.png"}
+                alt="Sponsor"
+                width={56}
+                height={37}
+                className="object-contain"
+              />
+            )}
           </div>
         </div>
       )}
