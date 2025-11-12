@@ -47,25 +47,12 @@ const ModalProductEdit = ({
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
-        const response = await axios.get(
-          `${API_URL}/categorias_y_destacados.php`
-        );
+        const response = await axios.get(`${API_URL}/categorias.php`);
         console.log("Categorías recibidas:", response.data);
 
-        // ✅ Acceder a response.data.categorias y mapear al formato esperado
-        if (response.data.success && Array.isArray(response.data.categorias)) {
-          const categoriasFormateadas = response.data.categorias.map(
-            (cat: any) => ({
-              categoria: {
-                id: cat.id,
-                nombre: cat.nombre,
-                alias: cat.alias,
-              },
-              subcategorias: cat.subcategorias,
-            })
-          );
-
-          setCategories(categoriasFormateadas);
+        // ✅ La nueva API ya devuelve el formato correcto
+        if (response.data && Array.isArray(response.data)) {
+          setCategories(response.data);
         } else {
           console.error(
             "La respuesta no tiene el formato esperado:",
