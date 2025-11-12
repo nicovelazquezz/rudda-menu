@@ -373,7 +373,7 @@ export default function HomePage() {
 
               const shouldShowEnaSponsor =
                 sub.nombre === "Signature Drinks" ||
-                sub.nombre === "Smoothies Energeticos";
+                sub.nombre === "Smoothies Energéticos";
 
               const shouldShowPastoSponsor = sub.id === 37;
 

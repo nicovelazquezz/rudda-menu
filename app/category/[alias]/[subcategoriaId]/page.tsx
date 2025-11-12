@@ -157,7 +157,7 @@ export default function CategoryPage({
   // ← NUEVO: Determinar qué sponsor mostrar (si alguno)
   const getSponsorLogo = () => {
     const nombre = subcategoria?.nombre?.toLowerCase();
-    if (nombre === "signature drinks" || nombre === "smoothies energeticos") {
+    if (nombre === "signature drinks" || nombre === "smoothies energéticos") {
       return "/ena-sport.png";
     }    
     if (nombre === "comida energética" || subcategoriaId === "37") {
