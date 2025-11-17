@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useProductosPorSubcategoria } from "@/hooks/useMenuData";
 import BackToTop from "@/components/BackToTop";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 function MenuItemRow({
   name,
@@ -21,6 +22,7 @@ function MenuItemRow({
   promocional,
   options,
   mostrarPrecioEspecial,
+  onClick,
 }: {
   name: string;
   description?: string;
@@ -30,6 +32,7 @@ function MenuItemRow({
   promocional?: string;
   options?: { label: string; value: string }[];
   mostrarPrecioEspecial?: boolean;
+  onClick?: () => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasLongDescription = description && description.length > 120;
@@ -40,7 +43,10 @@ function MenuItemRow({
     .replace(/\r\n|\r|\n/g, "\n");
 
   return (
-    <div className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+    <div
+      className="group rounded-2xl border border-white/15 bg-white/8 hover:bg-white/12 transition-colors shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] cursor-pointer"
+      onClick={onClick}
+    >
       <div className="flex gap-4 p-3 sm:p-4">
         {/* imagen */}
         {image ? (
@@ -153,6 +159,10 @@ export default function CategoryPage({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [productosDestacados, setProductosDestacados] = useState<any[]>([]);
+
+  // Estados para el modal de detalle de producto
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // ← NUEVO: Determinar qué sponsor mostrar (si alguno)
   const getSponsorLogo = () => {
@@ -332,7 +342,14 @@ export default function CategoryPage({
             className="flex gap-3 overflow-x-auto  scrollbar-hide scroll-smooth"
           >
             {productosDestacados.map((producto) => (
-              <div key={producto.id} className="flex-shrink-0 w-36">
+              <div
+                key={producto.id}
+                className="flex-shrink-0 w-36 cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => {
+                  setSelectedProduct(producto);
+                  setModalOpen(true);
+                }}
+              >
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
                   <Image
                     src={producto.photo}
@@ -453,6 +470,10 @@ export default function CategoryPage({
                   promocional={item.promotion}
                   options={options}
                   mostrarPrecioEspecial={mostrarPrecioEspecial}
+                  onClick={() => {
+                    setSelectedProduct(item);
+                    setModalOpen(true);
+                  }}
                 />
               );
             })}
@@ -462,6 +483,16 @@ export default function CategoryPage({
 
       <div className="h-6" />
       <BackToTop />
+
+      {/* Modal de detalle de producto */}
+      {selectedProduct && (
+        <ProductDetailModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          product={selectedProduct}
+          mostrarPrecioEspecial={mostrarPrecioEspecial}
+        />
+      )}
     </div>
   );
 }

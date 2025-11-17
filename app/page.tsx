@@ -7,6 +7,7 @@ import { CategoryCard } from "@/components/ui/CategoryCard";
 import { useMenuData } from "@/hooks/useMenuData";
 import ModalPromos from "@/components/ModalPromos";
 import BackToTop from "@/components/BackToTop";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 
 export default function HomePage() {
@@ -20,6 +21,10 @@ export default function HomePage() {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [canScrollLeft2, setCanScrollLeft2] = useState(false); // ← NUEVO
   const [canScrollRight2, setCanScrollRight2] = useState(true); // ← NUEVO
+
+  // Estados para el modal de detalle de producto
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // ← MODIFICADO: Agregar productosDestacados
   const { categorias, destacados, productosDestacados, loading, error } =
@@ -232,7 +237,22 @@ export default function HomePage() {
             className="flex gap-3 overflow-x-auto pb-2 px-6 scrollbar-hide scroll-smooth"
           >
             {destacados.map((item) => (
-              <div key={item.id} className="flex-shrink-0 w-36">
+              <div
+                key={item.id}
+                className="flex-shrink-0 w-36 cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => {
+                  // Adaptar la estructura del producto destacado al formato del modal
+                  setSelectedProduct({
+                    name: item.nombre,
+                    description: item.descripcion,
+                    price: item.precio,
+                    special_price: item.precioespecial,
+                    photo: item.foto,
+                    promotion: item.promocional,
+                  });
+                  setModalOpen(true);
+                }}
+              >
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
             {item.foto ? (
 <Image
@@ -403,6 +423,16 @@ export default function HomePage() {
         )}
       </div>
       <BackToTop />
+
+      {/* Modal de detalle de producto */}
+      {selectedProduct && (
+        <ProductDetailModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          product={selectedProduct}
+          mostrarPrecioEspecial={true}
+        />
+      )}
     </div>
   );
 }
