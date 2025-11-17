@@ -99,31 +99,6 @@ export function ProductDetailModal({
         )}
 
         <div className="p-6 space-y-6">
-          {/* Precio destacado */}
-          <div className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-white/8 border border-white/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-            {mostrarPrecioEspecial &&
-            product.special_price &&
-            Number(product.special_price) > 0 ? (
-              <div className="flex items-center gap-4">
-                <span className="text-xl text-white/50 line-through">
-                  ${Math.trunc(Number(product.price))}
-                </span>
-                <span className="text-4xl sm:text-5xl font-bold text-accent drop-shadow-md">
-                  ${Math.trunc(Number(product.special_price))}
-                </span>
-              </div>
-            ) : (
-              <span className="text-4xl sm:text-5xl font-bold text-accent drop-shadow-md">
-                ${Math.trunc(Number(product.price))}
-              </span>
-            )}
-          </div>
-
-          {/* Divisor decorativo */}
-          {(normalizedDescription || product.promotion || options.length > 0) && (
-            <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          )}
-
           {/* Descripción */}
           {normalizedDescription && (
             <div className="space-y-3">
@@ -131,11 +106,36 @@ export function ProductDetailModal({
                 <span className="h-1 w-1 rounded-full bg-accent" />
                 Descripción
               </h3>
-              <p className="text-[15px] leading-relaxed text-white/90 whitespace-pre-line">
+              <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">
                 {normalizedDescription}
               </p>
             </div>
           )}
+
+          {/* Divisor decorativo */}
+          {normalizedDescription && (
+            <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          )}
+
+          {/* Precio destacado */}
+          <div className="flex items-center justify-center gap-2 p-2.5 rounded-lg bg-white/8 border border-white/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+            {mostrarPrecioEspecial &&
+            product.special_price &&
+            Number(product.special_price) > 0 ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-white/50 line-through">
+                  ${Math.trunc(Number(product.price))}
+                </span>
+                <span className="text-xl font-bold text-accent drop-shadow-md">
+                  ${Math.trunc(Number(product.special_price))}
+                </span>
+              </div>
+            ) : (
+              <span className="text-xl font-bold text-accent drop-shadow-md">
+                ${Math.trunc(Number(product.price))}
+              </span>
+            )}
+          </div>
 
           {/* Texto promocional */}
           {product.promotion && (
